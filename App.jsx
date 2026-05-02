@@ -30,13 +30,12 @@ const C = {
   textMut:   'rgba(240,242,245,0.28)',
 }
 
-const REWARD_PREVIEW = { name: 'Coffee Break', cost: 15 }
 const DEFAULT_GOAL   = 'Finish the most important task of the day'
 const DEFAULT_TINY   = 'Work for just 5 minutes — no pressure, just begin.'
 const defaultTasks   = [
-  { id: 1, text: 'Review project plan', done: false },
-  { id: 2, text: 'Send follow-up email', done: false },
-  { id: 3, text: 'Read for 20 minutes',  done: false },
+  { id: 1, text: 'Pick one useful task', done: false },
+  { id: 2, text: 'Clear one small area', done: false },
+  { id: 3, text: 'Do one 10-minute focus sprint', done: false },
 ]
 const DURATIONS = [
   { label: '5 min',  seconds: 5  * 60, pts: 3 },
@@ -72,6 +71,7 @@ export default function App() {
   const [tinyText, setTinyText] = useState(() => load('ff_tinyText', DEFAULT_TINY))
   const [habits, setHabits] = useState(() => load('ff_habits', []))
   const [rewards, setRewards] = useState(() => load('ff_rewards', DEFAULT_REWARDS))
+  const [goals, setGoals] = useState(() => load('ff_goals', []))
   const [restartOpen, setRestartOpen] = useState(false)
   const [restarted, setRestarted] = useState(false)
 
@@ -82,13 +82,22 @@ export default function App() {
   useEffect(() => save('ff_tinyText', tinyText), [tinyText])
   useEffect(() => save('ff_habits', habits), [habits])
   useEffect(() => save('ff_rewards', rewards), [rewards])
+  useEffect(() => save('ff_goals', goals), [goals])
+
+  function startNewDay() {
+    setTasks(prev => prev.map(t => ({ ...t, done: false })))
+    setTinyDone(false)
+    setHabits(prev => prev.map(h => ({ ...h, todayStatus: null, skipMsg: null })))
+    setRestarted(false)
+    setRestartOpen(false)
+  }
 
   function resetAllData() {
     if (!window.confirm('Reset all data? This cannot be undone.')) return
-    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards'].forEach(k => localStorage.removeItem(k))
+    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals'].forEach(k => localStorage.removeItem(k))
     setPoints(0); setTasks(defaultTasks); setTinyDone(false)
     setMainGoal(DEFAULT_GOAL); setTinyText(DEFAULT_TINY)
-    setHabits([]); setRewards(DEFAULT_REWARDS)
+    setHabits([]); setRewards(DEFAULT_REWARDS); setGoals([])
     setRestartOpen(false); setRestarted(false)
   }
 
@@ -118,8 +127,11 @@ export default function App() {
 
   const tabs = ['today', 'focus', 'goals', 'habits', 'rewards']
   const doneTasks = tasks.filter(t => t.done).length
-  const pctToReward = Math.min(100, (points / REWARD_PREVIEW.cost) * 100)
-  const canClaim = points >= REWARD_PREVIEW.cost
+  const nextReward = rewards.length > 0
+    ? (rewards.filter(r => r.cost > points).sort((a, b) => a.cost - b.cost)[0] || rewards.slice().sort((a, b) => a.cost - b.cost)[0])
+    : null
+  const pctToReward = nextReward ? Math.min(100, (points / nextReward.cost) * 100) : 0
+  const canClaim = nextReward ? points >= nextReward.cost : false
 
   return (
     <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: C.bg }}>
@@ -147,6 +159,10 @@ export default function App() {
               <div style={{ width: 56, height: 56, borderRadius: 16, background: C.blueLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎯</div>
             </div>
 
+            <div style={{ background: C.cardAlt, borderRadius: 14, padding: '12px 16px', border: `1px solid ${C.border}`, fontSize: 13, color: C.textSec, lineHeight: 1.6, textAlign: 'center', fontStyle: 'italic' }}>
+              Pick one goal. Start tiny. Focus once. Earn a reward. Restart anytime.
+            </div>
+
             <Card><Label>🏆 Main Goal</Label><EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline /></Card>
 
             <Card>
@@ -162,20 +178,28 @@ export default function App() {
               </div>
             </Card>
 
-            <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}><Label>🎁 Next Reward</Label>{canClaim && <Badge color={C.orange}>Ready!</Badge>}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 46, height: 46, borderRadius: 14, fontSize: 22, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>☕</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{REWARD_PREVIEW.name}</div>
-                  <div style={{ fontSize: 12, color: C.textSec, marginBottom: 7 }}>{canClaim ? 'You can claim this now!' : `${REWARD_PREVIEW.cost - points} pts to go`}</div>
-                  <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 6, height: 6, overflow: 'hidden' }}><div style={{ height: '100%', width: `${pctToReward}%`, background: canClaim ? C.green : C.orange, borderRadius: 6, transition: 'width 0.4s' }} /></div>
+            {nextReward ? (
+              <Card>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}><Label>🎁 Next Reward</Label>{canClaim && <Badge color={C.orange}>Ready!</Badge>}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 14, fontSize: 22, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{nextReward.emoji}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{nextReward.name}</div>
+                    <div style={{ fontSize: 12, color: C.textSec, marginBottom: 7 }}>{canClaim ? 'You can claim this now!' : `${nextReward.cost - points} pts to go`}</div>
+                    <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 6, height: 6, overflow: 'hidden' }}><div style={{ height: '100%', width: `${pctToReward}%`, background: canClaim ? C.green : C.orange, borderRadius: 6, transition: 'width 0.4s' }} /></div>
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: canClaim ? C.green : C.orange, minWidth: 44, textAlign: 'right' }}>{points}/{nextReward.cost}</div>
                 </div>
-                <div style={{ fontWeight: 800, fontSize: 16, color: canClaim ? C.green : C.orange, minWidth: 44, textAlign: 'right' }}>{points}/{REWARD_PREVIEW.cost}</div>
+              </Card>
+            ) : (
+              <div style={{ background: C.card, borderRadius: 20, padding: '14px 18px', border: `1px solid ${C.border}`, fontSize: 13, color: C.textMut, textAlign: 'center' }}>
+                No rewards set. <button onClick={() => setTab('rewards')} style={{ background: 'none', border: 'none', color: C.blue, cursor: 'pointer', fontWeight: 700, fontSize: 13, padding: 0 }}>Add one →</button>
               </div>
-            </Card>
+            )}
 
             <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '15px', fontSize: 16 }}>▶ Start Focus Session</button>
+
+            <button onClick={startNewDay} style={{ ...GhostBtn, padding: '14px' }}>🌅 Start New Day</button>
 
             {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 16, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}><span style={{ fontSize: 20 }}>💚</span><div><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>Your Tiny Start has been updated. Keep going.</div></div></div>}
 
@@ -186,7 +210,7 @@ export default function App() {
         )}
 
         {tab === 'focus' && <FocusTimer onComplete={pts => setPoints(p => p + pts)} />}
-        {tab === 'goals' && <Card><Label>🏆 Goals</Label><Empty>Your goals will appear here.</Empty></Card>}
+        {tab === 'goals' && <GoalsTab goals={goals} setGoals={setGoals} />}
         {tab === 'habits' && <HabitsTab habits={habits} setHabits={setHabits} onPoints={p => setPoints(prev => Math.max(0, prev + p))} />}
         {tab === 'rewards' && (
           <RewardsTab
@@ -362,6 +386,136 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
               <div style={{ padding: '11px 18px', background: isClaimed ? C.greenLight : C.redLight, borderTop: `1px solid ${isClaimed ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 16 }}>{isClaimed ? '🎉' : '💪'}</span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: isClaimed ? C.green : C.red }}>{isClaimed ? `Reward claimed! Enjoy your ${reward.name}.` : 'Earn one more tiny win first.'}</span>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+const BREAKDOWN_STEPS = [
+  'Write down exactly what done looks like.',
+  'Identify the very first physical action.',
+  'Remove one obstacle before you start.',
+  'Set a timer for 10 minutes and just begin.',
+  'After 10 minutes, decide whether to keep going.',
+]
+
+function GoalsTab({ goals, setGoals }) {
+  const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [expandedId, setExpandedId] = useState(null)
+  const [form, setForm] = useState({ name: '', why: '', tinyStep: '', minWin: '', backup: '' })
+  const nameRef = useRef()
+  useEffect(() => { if ((adding || editingId) && nameRef.current) nameRef.current.focus() }, [adding, editingId])
+
+  function blankForm() { return { name: '', why: '', tinyStep: '', minWin: '', backup: '' } }
+
+  function startAdd() { setEditingId(null); setForm(blankForm()); setAdding(true) }
+
+  function startEdit(goal) {
+    setAdding(false)
+    setEditingId(goal.id)
+    setForm({ name: goal.name, why: goal.why || '', tinyStep: goal.tinyStep || '', minWin: goal.minWin || '', backup: goal.backup || '' })
+  }
+
+  function cancelForm() { setAdding(false); setEditingId(null) }
+
+  function saveAdd() {
+    const name = form.name.trim()
+    if (!name) return
+    setGoals(prev => [...prev, { id: Date.now(), name, why: form.why, tinyStep: form.tinyStep, minWin: form.minWin, backup: form.backup, breakdown: false }])
+    setAdding(false)
+  }
+
+  function saveEdit() {
+    const name = form.name.trim()
+    if (!name) return
+    setGoals(prev => prev.map(g => g.id === editingId ? { ...g, name, why: form.why, tinyStep: form.tinyStep, minWin: form.minWin, backup: form.backup } : g))
+    setEditingId(null)
+  }
+
+  function deleteGoal(id) { setGoals(prev => prev.filter(g => g.id !== id)); if (expandedId === id) setExpandedId(null) }
+
+  function toggleBreakdown(id) { setExpandedId(v => v === id ? null : id) }
+
+  const Field = ({ label, value, field, placeholder, multiline }) => (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 4 }}>{label}</div>
+      {multiline
+        ? <textarea value={value} onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))} placeholder={placeholder} rows={2} style={{ width: '100%', fontSize: 13, padding: '9px 12px', borderRadius: 10, border: `1px solid ${C.border}`, background: C.cardAlt, color: C.textPri, outline: 'none', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }} />
+        : <input value={value} onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))} placeholder={placeholder} style={{ width: '100%', fontSize: 13, padding: '9px 12px', borderRadius: 10, border: `1px solid ${C.border}`, background: C.cardAlt, color: C.textPri, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+      }
+    </div>
+  )
+
+  const GoalForm = ({ onSave }) => (
+    <div style={{ background: C.card, borderRadius: 20, padding: '16px 18px', border: `1.5px solid ${C.blue}` }}>
+      <Label>{editingId ? '✏️ Edit Goal' : '🎯 New Goal'}</Label>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 4 }}>Goal name</div>
+        <input ref={nameRef} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onKeyDown={e => e.key === 'Escape' && cancelForm()} placeholder="e.g. Launch my side project" style={{ width: '100%', fontSize: 14, padding: '10px 13px', borderRadius: 12, border: `1.5px solid ${C.blue}`, background: C.cardAlt, color: C.textPri, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+      </div>
+      <Field label="Why it matters" field="why" value={form.why} placeholder="What changes if you achieve this?" multiline />
+      <Field label="Tiny next step" field="tinyStep" value={form.tinyStep} placeholder="The smallest possible action right now" />
+      <Field label="Minimum win" field="minWin" value={form.minWin} placeholder="What counts as good enough today?" />
+      <Field label="Backup plan" field="backup" value={form.backup} placeholder="If things go wrong, I will…" />
+      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        <button onClick={onSave} style={{ ...PrimaryBtn, flex: 1 }}>Save goal</button>
+        <button onClick={cancelForm} style={{ ...GhostBtn, flex: 1 }}>Cancel</button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontWeight: 800, fontSize: 17, color: C.textPri }}>🏆 Goals</div>
+        {!adding && !editingId && <button onClick={startAdd} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: 12, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>+ Add goal</button>}
+      </div>
+
+      {adding && <GoalForm onSave={saveAdd} />}
+
+      {goals.length === 0 && !adding && (
+        <div style={{ background: C.card, borderRadius: 20, padding: '32px 20px', border: `1px solid ${C.border}`, textAlign: 'center' }}>
+          <div style={{ fontSize: 38, marginBottom: 10 }}>🎯</div>
+          <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No goals yet</div>
+          <div style={{ fontSize: 13, color: C.textSec }}>Add a goal to break it down and make it real.</div>
+        </div>
+      )}
+
+      {goals.map(goal => {
+        if (editingId === goal.id) return <div key={goal.id}><GoalForm onSave={saveEdit} /></div>
+        const isExpanded = expandedId === goal.id
+        return (
+          <div key={goal.id} style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: goal.why || goal.tinyStep || goal.minWin || goal.backup ? 10 : 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 16, color: C.textPri, flex: 1, paddingRight: 10 }}>{goal.name}</div>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button onClick={() => startEdit(goal)} style={{ background: C.cardAlt, color: C.textSec, border: `1px solid ${C.border}`, borderRadius: 9, padding: '5px 10px', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>Edit</button>
+                  <button onClick={() => deleteGoal(goal.id)} style={{ background: 'rgba(239,68,68,0.1)', color: C.red, border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 9, padding: '5px 10px', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>Delete</button>
+                </div>
+              </div>
+              {goal.why && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Why: </span>{goal.why}</div>}
+              {goal.tinyStep && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Next step: </span>{goal.tinyStep}</div>}
+              {goal.minWin && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Min win: </span>{goal.minWin}</div>}
+              {goal.backup && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Backup: </span>{goal.backup}</div>}
+              <button onClick={() => toggleBreakdown(goal.id)} style={{ marginTop: 8, background: isExpanded ? C.blueLight : C.cardAlt, color: isExpanded ? C.blue : C.textSec, border: `1px solid ${isExpanded ? C.blue : C.border}`, borderRadius: 10, padding: '7px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
+                {isExpanded ? '▲ Hide breakdown' : '🧩 Break It Down'}
+              </button>
+            </div>
+            {isExpanded && (
+              <div style={{ borderTop: `1px solid ${C.border}`, padding: '14px 18px', background: C.cardAlt }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Action steps</div>
+                {BREAKDOWN_STEPS.map((step, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: C.blueLight, color: C.blue, fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
+                    <div style={{ fontSize: 13, color: C.textSec, lineHeight: 1.5 }}>{step}</div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
