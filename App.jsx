@@ -165,6 +165,9 @@ export default function App() {
     setMainGoal(DEFAULT_GOAL); setTinyText(DEFAULT_TINY)
     setHabits([]); setRewards(DEFAULT_REWARDS); setGoals([])
     setRestartOpen(false); setRestarted(false)
+    clearInterval(timerRef.current)
+    setTimerSelected(DURATIONS[2]); setTimerEndAt(null); setTimerLeft(null)
+    setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false)
   }
 
   function pickRestartOption(opt) {
