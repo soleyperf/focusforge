@@ -74,13 +74,37 @@ export default function App() {
   const [goals, setGoals] = useState(() => load('ff_goals', []))
   const [restartOpen, setRestartOpen] = useState(false)
   const [restarted, setRestarted] = useState(false)
-  const [timerSelected, setTimerSelected] = useState(DURATIONS[2])
-  const [timerLeft, setTimerLeft] = useState(null)
-  const [timerRunning, setTimerRunning] = useState(false)
-  const [timerCompleted, setTimerCompleted] = useState(false)
-  const [timerClaimed, setTimerClaimed] = useState(false)
+  const [timerSelected, setTimerSelected] = useState(() => {
+    const s = load('ff_timer', null)
+    return (s && DURATIONS.find(d => d.label === s.selectedLabel)) || DURATIONS[2]
+  })
+  const [timerEndAt, setTimerEndAt] = useState(() => {
+    const s = load('ff_timer', null)
+    return (s && s.running && s.endAt && s.endAt > Date.now()) ? s.endAt : null
+  })
+  const [timerLeft, setTimerLeft] = useState(() => {
+    const s = load('ff_timer', null)
+    if (!s) return null
+    if (s.running && s.endAt) return Math.max(0, Math.ceil((s.endAt - Date.now()) / 1000))
+    return s.left ?? null
+  })
+  const [timerRunning, setTimerRunning] = useState(() => {
+    const s = load('ff_timer', null)
+    return !!(s && s.running && s.endAt && s.endAt > Date.now())
+  })
+  const [timerCompleted, setTimerCompleted] = useState(() => {
+    const s = load('ff_timer', null)
+    if (!s) return false
+    if (s.running && s.endAt && s.endAt <= Date.now()) return true
+    return s.completed || false
+  })
+  const [timerClaimed, setTimerClaimed] = useState(() => {
+    const s = load('ff_timer', null)
+    return !!(s && s.claimed)
+  })
   const [feedbackOn, setFeedbackOn] = useState(() => load('ff_feedbackOn', true))
   const timerRef = useRef(null)
+  const timerSoundFired = useRef(false)
 
   useEffect(() => save('ff_points', points), [points])
   useEffect(() => save('ff_tasks', tasks), [tasks])
@@ -92,22 +116,39 @@ export default function App() {
   useEffect(() => save('ff_goals', goals), [goals])
   useEffect(() => save('ff_feedbackOn', feedbackOn), [feedbackOn])
   useEffect(() => {
-    if (timerCompleted && feedbackOn) {
-      playCompletionSound()
-      if (navigator.vibrate) navigator.vibrate([200, 80, 200, 80, 400])
+    save('ff_timer', {
+      selectedLabel: timerSelected.label,
+      endAt: timerEndAt,
+      left: timerLeft,
+      running: timerRunning,
+      completed: timerCompleted,
+      claimed: timerClaimed,
+    })
+  }, [timerSelected, timerEndAt, timerLeft, timerRunning, timerCompleted, timerClaimed])
+  useEffect(() => {
+    if (timerSoundFired.current) {
+      if (timerCompleted && feedbackOn) {
+        playCompletionSound()
+        if (navigator.vibrate) navigator.vibrate([200, 80, 200, 80, 400])
+      }
+    } else {
+      timerSoundFired.current = true
     }
   }, [timerCompleted])
   useEffect(() => {
-    if (timerRunning) {
+    if (timerRunning && timerEndAt) {
       timerRef.current = setInterval(() => {
-        setTimerLeft(t => {
-          if (t <= 1) { clearInterval(timerRef.current); setTimerRunning(false); setTimerCompleted(true); return 0 }
-          return t - 1
-        })
-      }, 1000)
+        const left = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000))
+        setTimerLeft(left)
+        if (left <= 0) {
+          clearInterval(timerRef.current)
+          setTimerRunning(false)
+          setTimerCompleted(true)
+        }
+      }, 500)
     }
     return () => clearInterval(timerRef.current)
-  }, [timerRunning])
+  }, [timerRunning, timerEndAt])
 
   function startNewDay() {
     setTasks(prev => prev.map(t => ({ ...t, done: false })))
@@ -119,7 +160,7 @@ export default function App() {
 
   function resetAllData() {
     if (!window.confirm('Reset all data? This cannot be undone.')) return
-    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals'].forEach(k => localStorage.removeItem(k))
+    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer'].forEach(k => localStorage.removeItem(k))
     setPoints(0); setTasks(defaultTasks); setTinyDone(false)
     setMainGoal(DEFAULT_GOAL); setTinyText(DEFAULT_TINY)
     setHabits([]); setRewards(DEFAULT_REWARDS); setGoals([])
@@ -149,11 +190,33 @@ export default function App() {
   function completeTiny() {
     if (!tinyDone) { setTinyDone(true); setPoints(p => p + 2) }
   }
-  const timerStart  = () => { setTimerLeft(timerSelected.seconds); setTimerCompleted(false); setTimerClaimed(false); setTimerRunning(true) }
-  const timerPause  = () => { clearInterval(timerRef.current); setTimerRunning(false) }
-  const timerResume = () => setTimerRunning(true)
-  const timerReset  = () => { clearInterval(timerRef.current); setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerLeft(null) }
-  const timerClaim  = () => { if (!timerClaimed) { setPoints(p => p + timerSelected.pts); setTimerClaimed(true) } }
+  const timerStart = () => {
+    const endAt = Date.now() + timerSelected.seconds * 1000
+    setTimerEndAt(endAt)
+    setTimerLeft(timerSelected.seconds)
+    setTimerCompleted(false)
+    setTimerClaimed(false)
+    setTimerRunning(true)
+  }
+  const timerPause = () => {
+    clearInterval(timerRef.current)
+    setTimerEndAt(null)
+    setTimerRunning(false)
+  }
+  const timerResume = () => {
+    const endAt = Date.now() + (timerLeft ?? 0) * 1000
+    setTimerEndAt(endAt)
+    setTimerRunning(true)
+  }
+  const timerReset = () => {
+    clearInterval(timerRef.current)
+    setTimerEndAt(null)
+    setTimerLeft(null)
+    setTimerRunning(false)
+    setTimerCompleted(false)
+    setTimerClaimed(false)
+  }
+  const timerClaim = () => { if (!timerClaimed) { setPoints(p => p + timerSelected.pts); setTimerClaimed(true) } }
 
   const timerIsIdle   = timerLeft === null
   const timerDisplay  = timerLeft ?? timerSelected.seconds
