@@ -24,12 +24,17 @@ A lightweight productivity app built with React + Vite that helps users manage t
 ## Features
 
 - **Points System** — earn points by completing tasks and focus sessions
-- **Today Tab** — Main Goal, Tiny Start, Top 3 tasks, Next Reward preview, Start New Day reset
-- **Focus Timer** — configurable 5/10/25 min timer with visual progress ring and sound/haptic feedback
+- **Next Best Action** — card at top of Today showing first incomplete task with "Start Now" button; fallback when all done
+- **Today Tab** — Main Goal, Tiny Start, Top 3 tasks with per-task Focus button, Next Reward preview, Start New Day reset
+- **Focus Timer** — configurable 5/10/25 min timer with visual progress ring, sound/haptic feedback
+  - Active focus task banner shown above timer when set from Today
+  - "End early — partial win" button during running session (+1 pt, prevents double-claim)
+  - "I'm stuck" panel with 4 options: shrink task, 5-min mode, reset break, return to Today
 - **Goals Tab** — Add/edit/delete goals with Why/TinyStep/MinWin/Backup fields and Break It Down steps
 - **Habit Tracker** — daily streaks with Full/Partial/Skip options
 - **Rewards Shop** — fully customizable rewards with emoji, name, and point cost
-- **Persistence** — all data saved in localStorage (ff_ prefix)
+- **Settings section** (bottom of Today) — Export Data (JSON download), Import Data (JSON restore), Danger Zone reset
+- **Persistence** — all data saved in localStorage (ff_ prefix); ff_focusTask and ff_timer.partial added
 - **Input Validation** — blank name checks and cost >= 1 enforced with inline error messages
 - **Footer Disclaimer** — legal disclaimer shown on every tab
 
