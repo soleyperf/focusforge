@@ -249,13 +249,45 @@ function HabitsTab({ habits, setHabits, onPoints }) {
   </div>
 }
 
+function playCompletionSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const notes = [523.25, 659.25, 783.99, 1046.5]
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      const t = ctx.currentTime + i * 0.18
+      gain.gain.setValueAtTime(0, t)
+      gain.gain.linearRampToValueAtTime(0.28, t + 0.04)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55)
+      osc.start(t)
+      osc.stop(t + 0.55)
+    })
+  } catch {}
+}
+
 function FocusTimer({ onComplete }) {
   const [selected, setSelected] = useState(DURATIONS[2])
   const [timeLeft, setTimeLeft] = useState(null)
   const [running, setRunning] = useState(false)
   const [completed, setCompleted] = useState(false)
   const [claimed, setClaimed] = useState(false)
+  const [feedbackOn, setFeedbackOn] = useState(() => load('ff_feedbackOn', true))
   const intervalRef = useRef(null)
+
+  useEffect(() => save('ff_feedbackOn', feedbackOn), [feedbackOn])
+
+  useEffect(() => {
+    if (completed && feedbackOn) {
+      playCompletionSound()
+      if (navigator.vibrate) navigator.vibrate([200, 80, 200, 80, 400])
+    }
+  }, [completed])
+
   useEffect(() => { if (running) { intervalRef.current = setInterval(() => { setTimeLeft(t => { if (t <= 1) { clearInterval(intervalRef.current); setRunning(false); setCompleted(true); return 0 } return t - 1 }) }, 1000) } return () => clearInterval(intervalRef.current) }, [running])
   const start = () => { setTimeLeft(selected.seconds); setCompleted(false); setClaimed(false); setRunning(true) }
   const pause = () => { clearInterval(intervalRef.current); setRunning(false) }
@@ -272,7 +304,7 @@ function FocusTimer({ onComplete }) {
   const dashOffset = circ * (1 - pct)
   const ringColor = completed ? C.green : running ? C.blue : C.orange
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-    {isIdle && <Card><Label>⏱ Choose session length</Label><div style={{ display: 'flex', gap: 10 }}>{DURATIONS.map(d => <button key={d.label} onClick={() => setSelected(d)} style={{ flex: 1, background: selected === d ? C.blue : C.cardAlt, color: selected === d ? '#fff' : C.textSec, border: `1px solid ${selected === d ? C.blue : C.border}`, borderRadius: 14, padding: '15px 6px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{d.label}<span style={{ display: 'block', fontSize: 11, marginTop: 3, fontWeight: 500, color: selected === d ? 'rgba(255,255,255,0.7)' : C.textMut }}>+{d.pts} pts</span></button>)}</div></Card>}
+    {isIdle && <Card><Label>⏱ Choose session length</Label><div style={{ display: 'flex', gap: 10 }}>{DURATIONS.map(d => <button key={d.label} onClick={() => setSelected(d)} style={{ flex: 1, background: selected === d ? C.blue : C.cardAlt, color: selected === d ? '#fff' : C.textSec, border: `1px solid ${selected === d ? C.blue : C.border}`, borderRadius: 14, padding: '15px 6px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{d.label}<span style={{ display: 'block', fontSize: 11, marginTop: 3, fontWeight: 500, color: selected === d ? 'rgba(255,255,255,0.7)' : C.textMut }}>+{d.pts} pts</span></button>)}</div><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.border}` }}><div><div style={{ fontSize: 13, fontWeight: 600, color: C.textSec }}>🔔 Sound & haptic feedback</div><div style={{ fontSize: 11, color: C.textMut, marginTop: 2 }}>Plays a chime when your session ends</div></div><button onClick={() => setFeedbackOn(v => !v)} style={{ background: feedbackOn ? C.blue : C.cardAlt, border: `1.5px solid ${feedbackOn ? C.blue : C.border}`, borderRadius: 20, width: 48, height: 26, cursor: 'pointer', position: 'relative', transition: 'background 0.2s, border-color 0.2s', flexShrink: 0 }}><div style={{ position: 'absolute', top: 3, left: feedbackOn ? 24 : 4, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} /></button></div></Card>}
     <div style={{ background: completed ? 'rgba(34,197,94,0.06)' : C.card, border: `1px solid ${completed ? 'rgba(34,197,94,0.2)' : C.border}`, borderRadius: 24, padding: '32px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}><div style={{ position: 'relative', width: 210, height: 210 }}><svg width="210" height="210" style={{ transform: 'rotate(-90deg)' }}><circle cx="105" cy="105" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="14" /><circle cx="105" cy="105" r={R} fill="none" stroke={ringColor} strokeWidth="14" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={isIdle ? circ : dashOffset} style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }} /></svg><div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>{completed ? <><div style={{ fontSize: 44 }}>✅</div><div style={{ fontSize: 14, fontWeight: 700, color: C.green, marginTop: 6 }}>Done!</div></> : <><div style={{ fontSize: 48, fontWeight: 800, color: C.textPri, letterSpacing: 1, lineHeight: 1 }}>{mins}:{secs}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 6 }}>{isIdle ? selected.label : running ? 'Stay focused' : 'Paused'}</div></>}</div></div>
     {completed ? (claimed ? <div style={{ textAlign: 'center' }}><div style={{ background: C.orange, color: '#fff', borderRadius: 16, padding: '14px 28px', fontWeight: 800, fontSize: 17, letterSpacing: 0.3 }}>🔥 Momentum protected</div><div style={{ color: C.green, fontWeight: 700, fontSize: 14, marginTop: 10 }}>+{selected.pts} pts added!</div><button onClick={reset} style={{ ...GhostBtn, marginTop: 14 }}>Start another session</button></div> : <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}><div style={{ fontSize: 15, fontWeight: 700, color: C.textPri }}>Session complete — claim your reward</div><button onClick={claim} style={{ ...PrimaryBtn, background: C.green }}>Claim +{selected.pts} pts</button><button onClick={reset} style={GhostBtn}>Discard</button></div>) : isIdle ? <button onClick={start} style={{ ...PrimaryBtn, width: 180, padding: '15px' }}>▶ Start</button> : <div style={{ display: 'flex', gap: 12, width: '100%' }}>{running ? <button onClick={pause} style={{ ...PrimaryBtn, flex: 1 }}>⏸ Pause</button> : <button onClick={resume} style={{ ...PrimaryBtn, flex: 1 }}>▶ Resume</button>}<button onClick={reset} style={{ ...GhostBtn, flex: 1 }}>↺ Reset</button></div>}
     </div>
