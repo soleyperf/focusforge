@@ -221,6 +221,9 @@ export default function App() {
           />
         )}
       </div>
+      <div style={{ padding: '20px 16px 32px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 8 }}>
+        <p style={{ fontSize: 11, color: C.textMut, margin: 0, lineHeight: 1.6 }}>FocusForge is a productivity support tool, not medical treatment or clinical advice.</p>
+      </div>
     </div>
   )
 }
@@ -258,6 +261,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
   const [adding, setAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({ name: '', emoji: '🎁', cost: 3 })
+  const [formError, setFormError] = useState(null)
   const nameRef = useRef()
   useEffect(() => { if ((adding || editingId) && nameRef.current) nameRef.current.focus() }, [adding, editingId])
 
@@ -279,18 +283,22 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
     setForm({ name: reward.name, emoji: reward.emoji, cost: reward.cost })
   }
 
-  function cancelForm() { setAdding(false); setEditingId(null) }
+  function cancelForm() { setAdding(false); setEditingId(null); setFormError(null) }
 
   function saveAdd() {
     const name = form.name.trim()
-    if (!name) return
+    if (!name) { setFormError('Reward name is required.'); return }
+    if (Number(form.cost) < 1) { setFormError('Point cost must be at least 1.'); return }
+    setFormError(null)
     setRewards(prev => [...prev, { id: Date.now(), name, emoji: form.emoji || '🎁', cost: Math.max(1, Number(form.cost) || 3) }])
     setAdding(false)
   }
 
   function saveEdit() {
     const name = form.name.trim()
-    if (!name) return
+    if (!name) { setFormError('Reward name is required.'); return }
+    if (Number(form.cost) < 1) { setFormError('Point cost must be at least 1.'); return }
+    setFormError(null)
     setRewards(prev => prev.map(r => r.id === editingId ? { ...r, name, emoji: form.emoji || '🎁', cost: Math.max(1, Number(form.cost) || 3) } : r))
     setEditingId(null)
   }
@@ -326,6 +334,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
         />
         <span style={{ fontSize: 13, color: C.textMut }}>pts</span>
       </div>
+      {formError && <div style={{ fontSize: 12, color: C.red, marginBottom: 10, padding: '8px 10px', background: C.redLight, borderRadius: 8 }}>{formError}</div>}
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={onSave} style={{ ...PrimaryBtn, flex: 1 }}>Save</button>
         <button onClick={cancelForm} style={{ ...GhostBtn, flex: 1 }}>Cancel</button>
@@ -408,6 +417,7 @@ function GoalsTab({ goals, setGoals }) {
   const [editingId, setEditingId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
   const [form, setForm] = useState({ name: '', why: '', tinyStep: '', minWin: '', backup: '' })
+  const [nameError, setNameError] = useState(false)
   const nameRef = useRef()
   useEffect(() => { if ((adding || editingId) && nameRef.current) nameRef.current.focus() }, [adding, editingId])
 
@@ -421,18 +431,20 @@ function GoalsTab({ goals, setGoals }) {
     setForm({ name: goal.name, why: goal.why || '', tinyStep: goal.tinyStep || '', minWin: goal.minWin || '', backup: goal.backup || '' })
   }
 
-  function cancelForm() { setAdding(false); setEditingId(null) }
+  function cancelForm() { setAdding(false); setEditingId(null); setNameError(false) }
 
   function saveAdd() {
     const name = form.name.trim()
-    if (!name) return
+    if (!name) { setNameError(true); return }
+    setNameError(false)
     setGoals(prev => [...prev, { id: Date.now(), name, why: form.why, tinyStep: form.tinyStep, minWin: form.minWin, backup: form.backup, breakdown: false }])
     setAdding(false)
   }
 
   function saveEdit() {
     const name = form.name.trim()
-    if (!name) return
+    if (!name) { setNameError(true); return }
+    setNameError(false)
     setGoals(prev => prev.map(g => g.id === editingId ? { ...g, name, why: form.why, tinyStep: form.tinyStep, minWin: form.minWin, backup: form.backup } : g))
     setEditingId(null)
   }
@@ -456,7 +468,8 @@ function GoalsTab({ goals, setGoals }) {
       <Label>{editingId ? '✏️ Edit Goal' : '🎯 New Goal'}</Label>
       <div style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 4 }}>Goal name</div>
-        <input ref={nameRef} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onKeyDown={e => e.key === 'Escape' && cancelForm()} placeholder="e.g. Launch my side project" style={{ width: '100%', fontSize: 14, padding: '10px 13px', borderRadius: 12, border: `1.5px solid ${C.blue}`, background: C.cardAlt, color: C.textPri, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+        <input ref={nameRef} value={form.name} onChange={e => { setForm(f => ({ ...f, name: e.target.value })); if (nameError) setNameError(false) }} onKeyDown={e => e.key === 'Escape' && cancelForm()} placeholder="e.g. Launch my side project" style={{ width: '100%', fontSize: 14, padding: '10px 13px', borderRadius: 12, border: `1.5px solid ${nameError ? C.red : C.blue}`, background: C.cardAlt, color: C.textPri, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+        {nameError && <div style={{ fontSize: 12, color: C.red, marginTop: 5 }}>Goal name is required.</div>}
       </div>
       <Field label="Why it matters" field="why" value={form.why} placeholder="What changes if you achieve this?" multiline />
       <Field label="Tiny next step" field="tinyStep" value={form.tinyStep} placeholder="The smallest possible action right now" />
@@ -528,13 +541,14 @@ function GoalsTab({ goals, setGoals }) {
 function HabitsTab({ habits, setHabits, onPoints }) {
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
+  const [nameError, setNameError] = useState(false)
   const inputRef = useRef()
   useEffect(() => { if (adding && inputRef.current) inputRef.current.focus() }, [adding])
-  function addHabit() { const name = newName.trim(); if (!name) return; setHabits(prev => [...prev, { id: Date.now(), name, streak: 0, todayStatus: null, skipMsg: null }]); setNewName(''); setAdding(false) }
+  function addHabit() { const name = newName.trim(); if (!name) { setNameError(true); return } setNameError(false); setHabits(prev => [...prev, { id: Date.now(), name, streak: 0, todayStatus: null, skipMsg: null }]); setNewName(''); setAdding(false) }
   function markHabit(id, status) { setHabits(prev => prev.map(h => { if (h.id !== id) return h; if (h.todayStatus === status) return h; const wasPartial = h.todayStatus === 'partial'; const wasFull = h.todayStatus === 'full'; if (status === 'full') { if (wasPartial) onPoints(2); else onPoints(3); return { ...h, todayStatus: 'full', streak: h.streak + 1, skipMsg: null } } if (status === 'partial') { if (wasFull) onPoints(-2); else onPoints(1); return { ...h, todayStatus: 'partial', streak: h.streak + 1, skipMsg: null } } if (status === 'skip') { if (wasFull) onPoints(-3); if (wasPartial) onPoints(-1); return { ...h, todayStatus: 'skip', skipMsg: SKIP_MESSAGES[Math.floor(Math.random() * SKIP_MESSAGES.length)] } } return h })) }
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ fontWeight: 800, fontSize: 17, color: C.textPri }}>🔁 Habits</div>{!adding && <button onClick={() => setAdding(true)} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: 12, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>+ Add habit</button>}</div>
-    {adding && <Card><Label>New habit</Label><input ref={inputRef} value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addHabit(); if (e.key === 'Escape') setAdding(false) }} placeholder="e.g. Drink water, Read, Exercise…" style={{ width: '100%', fontSize: 14, padding: '11px 13px', borderRadius: 12, border: `1.5px solid ${C.blue}`, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 10, background: C.cardAlt, color: C.textPri }} /><div style={{ display: 'flex', gap: 8 }}><button onClick={addHabit} style={{ ...PrimaryBtn, flex: 1 }}>Add</button><button onClick={() => { setAdding(false); setNewName('') }} style={{ ...GhostBtn, flex: 1 }}>Cancel</button></div></Card>}
+    {adding && <Card><Label>New habit</Label><input ref={inputRef} value={newName} onChange={e => { setNewName(e.target.value); if (nameError) setNameError(false) }} onKeyDown={e => { if (e.key === 'Enter') addHabit(); if (e.key === 'Escape') { setAdding(false); setNameError(false) } }} placeholder="e.g. Drink water, Read, Exercise…" style={{ width: '100%', fontSize: 14, padding: '11px 13px', borderRadius: 12, border: `1.5px solid ${nameError ? C.red : C.blue}`, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: nameError ? 4 : 10, background: C.cardAlt, color: C.textPri }} />{nameError && <div style={{ fontSize: 12, color: C.red, marginBottom: 8 }}>Habit name is required.</div>}<div style={{ display: 'flex', gap: 8 }}><button onClick={addHabit} style={{ ...PrimaryBtn, flex: 1 }}>Add</button><button onClick={() => { setAdding(false); setNewName(''); setNameError(false) }} style={{ ...GhostBtn, flex: 1 }}>Cancel</button></div></Card>}
     {habits.length === 0 && !adding && <Card><div style={{ textAlign: 'center', padding: '24px 0' }}><div style={{ fontSize: 38, marginBottom: 10 }}>🌱</div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No habits yet</div><div style={{ fontSize: 13, color: C.textSec }}>Add your first habit above to get started.</div></div></Card>}
     {habits.map(habit => <div key={habit.id} style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}><div style={{ padding: '14px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{habit.name}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>{habit.streak > 0 ? `🔥 ${habit.streak} day streak` : 'No streak yet — start today'}</div></div><button onClick={() => setHabits(prev => prev.filter(h => h.id !== habit.id))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textMut, fontSize: 16, padding: 4 }}>✕</button></div>{habit.todayStatus === 'skip' && habit.skipMsg && <div style={{ margin: '0 14px 12px', background: C.cardAlt, borderRadius: 12, padding: '10px 13px', fontSize: 13, color: C.textSec, fontStyle: 'italic' }}>{habit.skipMsg}</div>}<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: `1px solid ${C.border}` }}>{[{ status: 'full', label: '✅ Full win', pts: '+3', activeColor: C.green, activeBg: C.greenLight }, { status: 'partial', label: '⚡ Partial win', pts: '+1', activeColor: C.orange, activeBg: C.orangeLight }, { status: 'skip', label: '🤍 Skip', pts: '', activeColor: C.textSec, activeBg: C.cardAlt }].map((btn, i) => { const active = habit.todayStatus === btn.status; return <button key={btn.status} onClick={() => markHabit(habit.id, btn.status)} style={{ background: active ? btn.activeBg : 'transparent', border: 'none', borderRight: i < 2 ? `1px solid ${C.border}` : 'none', padding: '13px 4px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}><span style={{ fontSize: 12, fontWeight: 700, color: active ? btn.activeColor : C.textSec }}>{btn.label}</span>{btn.pts && <span style={{ fontSize: 11, color: active ? btn.activeColor : C.textMut, fontWeight: 600 }}>{btn.pts} pts</span>}</button> })}</div></div>)}
   </div>
