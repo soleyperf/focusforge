@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 
-/* ── Persistence helpers ── */
+/* â”€â”€ Persistence helpers â”€â”€ */
 function load(key, fallback) {
   try {
     const v = localStorage.getItem(key)
@@ -11,7 +11,7 @@ function save(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
 }
 
-/* ── Design tokens ── */
+/* â”€â”€ Design tokens â”€â”€ */
 const C = {
   bg:        '#0d0f14',
   card:      '#161b26',
@@ -31,7 +31,7 @@ const C = {
 }
 
 const DEFAULT_GOAL   = 'Finish the most important task of the day'
-const DEFAULT_TINY   = 'Work for just 5 minutes — no pressure, just begin.'
+const DEFAULT_TINY   = 'Work for just 5 minutes â€” no pressure, just begin.'
 const defaultTasks   = [
   { id: 1, text: 'Pick one useful task', done: false },
   { id: 2, text: 'Clear one small area', done: false },
@@ -43,16 +43,16 @@ const DURATIONS = [
   { label: '25 min', seconds: 25 * 60, pts: 5 },
 ]
 const RESTART_OPTIONS = [
-  { id: 'five', emoji: '⚡', label: 'Give me a 5-minute task', tiny: "Pick one small thing and work on it for just 5 minutes. That's all." },
-  { id: 'shrink', emoji: '🎯', label: "Shrink today's goal", tiny: 'Forget the big plan. One small win is enough for today.' },
-  { id: 'focus10', emoji: '⏱', label: 'Start a 10-minute focus', tiny: "Set a timer for 10 minutes. Just start — don't think, just go." },
-  { id: 'tomorrow', emoji: '📅', label: 'Move tasks to tomorrow', tiny: "Today's slate is clear. Rest, recharge, come back stronger." },
-  { id: 'break', emoji: '🧘', label: 'Quick reset break', tiny: 'Step away for 5 minutes. Breathe, stretch, then return fresh.' },
+  { id: 'five', emoji: 'âš¡', label: 'Give me a 5-minute task', tiny: "Pick one small thing and work on it for just 5 minutes. That's all." },
+  { id: 'shrink', emoji: 'ðŸŽ¯', label: "Shrink today's goal", tiny: 'Forget the big plan. One small win is enough for today.' },
+  { id: 'focus10', emoji: 'â±', label: 'Start a 10-minute focus', tiny: "Set a timer for 10 minutes. Just start â€” don't think, just go." },
+  { id: 'tomorrow', emoji: 'ðŸ“…', label: 'Move tasks to tomorrow', tiny: "Today's slate is clear. Rest, recharge, come back stronger." },
+  { id: 'break', emoji: 'ðŸ§˜', label: 'Quick reset break', tiny: 'Step away for 5 minutes. Breathe, stretch, then return fresh.' },
 ]
 const DEFAULT_REWARDS = [
-  { id: 1, name: 'YouTube', emoji: '📺', cost: 3 },
-  { id: 2, name: 'Music', emoji: '🎵', cost: 2 },
-  { id: 3, name: 'Gaming', emoji: '🎮', cost: 6 },
+  { id: 1, name: 'YouTube', emoji: 'ðŸ“º', cost: 3 },
+  { id: 2, name: 'Music', emoji: 'ðŸŽµ', cost: 2 },
+  { id: 3, name: 'Gaming', emoji: 'ðŸŽ®', cost: 6 },
 ]
 const SKIP_MESSAGES = [
   "That's okay. Tomorrow is fresh.",
@@ -268,13 +268,6 @@ export default function App() {
     reader.readAsText(file)
   }
 
-  const tabs = [
-    { id: 'today', label: 'Today', icon: '🏠' },
-    { id: 'focus', label: 'Focus', icon: '⏱' },
-    { id: 'goals', label: 'Goals', icon: '🎯' },
-    { id: 'habits', label: 'Habits', icon: '🔁' },
-    { id: 'rewards', label: 'Rewards', icon: '🎁' },
-  ]
   const doneTasks = tasks.filter(t => t.done).length
   const nextReward = rewards.length > 0
     ? (rewards.filter(r => r.cost > points).sort((a, b) => a.cost - b.cost)[0] || rewards.slice().sort((a, b) => a.cost - b.cost)[0])
@@ -284,55 +277,55 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: `radial-gradient(circle at 50% -10%, ${C.blueLight} 0%, transparent 34%), ${C.bg}` }}>
-      <div style={{ background: 'rgba(22,27,38,0.96)', borderBottom: `1px solid ${C.border}`, padding: '20px 22px', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 10px 28px rgba(0,0,0,0.22)' }}>
+      <div style={{ background: 'rgba(13,15,20,0.94)', borderBottom: `1px solid ${C.border}`, padding: '26px 22px 18px', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 10px 28px rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: 21, fontWeight: 850, color: C.textPri, letterSpacing: 0.1 }}><span style={{ color: C.blue }}>Focus</span>Forge</h1>
+          <h1 style={{ margin: 0, fontSize: 34, fontWeight: 900, color: C.textPri, letterSpacing: -1.2, lineHeight: 1 }}><span>Focus</span><span style={{ color: '#fb7b53' }}>Forge</span></h1>
           {(timerRunning || (timerCompleted && !timerClaimed)) && (
             <button onClick={() => setTab('focus')} style={{ background: timerCompleted ? C.greenLight : C.blueLight, border: `1px solid ${timerCompleted ? C.green : C.blue}`, borderRadius: 24, padding: '5px 12px', fontWeight: 700, fontSize: 12, color: timerCompleted ? C.green : C.blue, cursor: 'pointer', letterSpacing: 0.2, flexShrink: 0 }}>
-              {timerCompleted ? '✅ Claim session' : `⏱ ${timerMins}:${timerSecs}`}
+              {timerCompleted ? 'âœ… Claim session' : `â± ${timerMins}:${timerSecs}`}
             </button>
           )}
-          <div style={{ background: C.orange, borderRadius: 24, padding: '7px 14px', fontWeight: 800, fontSize: 13, color: '#fff', letterSpacing: 0.3, boxShadow: '0 8px 18px rgba(249,115,22,0.22)' }}>{points} pts</div>
+          <div style={{ background: 'rgba(255,255,255,0.045)', border: `1px solid ${C.border}`, borderRadius: 24, padding: '9px 14px', fontWeight: 850, fontSize: 16, color: '#fb7b53', letterSpacing: 0.2, boxShadow: '0 8px 18px rgba(0,0,0,0.22)' }}>🔥 {points}</div>
         </div>
       </div>
 
       <div style={{ padding: '20px 16px 112px' }}>
         {tab === 'today' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div style={{ padding: '14px 6px 4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ padding: '4px 2px 2px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ width: 54, height: 54, borderRadius: 18, background: 'rgba(251,191,36,0.12)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, flexShrink: 0 }}>??</div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: C.orange, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 9 }}>FocusForge</div>
-                  <div style={{ fontSize: 31, fontWeight: 850, color: C.textPri, lineHeight: 1.08, letterSpacing: -0.8 }}>Good morning.</div>
-                  <div style={{ fontSize: 15, color: C.textSec, lineHeight: 1.55, marginTop: 8, maxWidth: 290 }}>You don't need to do everything. Just what matters today.</div>
+                  <div style={{ fontSize: 26, fontWeight: 850, color: C.textPri, lineHeight: 1.1, letterSpacing: -0.5 }}>Good morning.</div>
+                  <div style={{ fontSize: 15, color: C.textSec, lineHeight: 1.45, marginTop: 5 }}>You don't need to do everything.<br />Just what matters today. <span style={{ color: '#9fb58d' }}>?</span></div>
                 </div>
-                <div style={{ background: C.orangeLight, border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 20, padding: '10px 14px', color: C.orange, fontWeight: 850, fontSize: 15, whiteSpace: 'nowrap' }}>{points} pts</div>
               </div>
             </div>
 
-            <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14 }}>
-                <div style={{ flex: 1 }}>
-                  <Label>Main Goal</Label>
-                  <EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline />
+            <Card variant="goal">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 18, alignItems: 'center' }}>
+                <div style={{ minWidth: 0 }}>
+                  <Label tone="green">Main Goal</Label>
+                  <EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline size="hero" />
                 </div>
+                <div style={{ width: 92, height: 92, borderRadius: '50%', background: 'radial-gradient(circle, rgba(249,115,22,0.95) 0 8%, transparent 9% 100%), repeating-radial-gradient(circle, rgba(158,178,135,0.78) 0 10px, transparent 11px 21px)', border: '1px solid rgba(158,178,135,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.orange, fontSize: 30, transform: 'rotate(-10deg)', flexShrink: 0 }}>?</div>
               </div>
             </Card>
 
             {nextBestTask && (
-              <div style={{ background: 'linear-gradient(135deg,#182818 0%,#101c12 100%)', border: `1px solid rgba(34,197,94,0.22)`, borderRadius: 24, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, boxShadow: '0 14px 34px rgba(0,0,0,0.18)' }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,191,36,0.06) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.28)`, borderRadius: 28, padding: '20px', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 16, boxShadow: '0 18px 40px rgba(0,0,0,0.24)' }}>
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 850, color: C.green, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 7 }}>Next Best Action</div>
-                  <div style={{ fontSize: 15, fontWeight: 750, color: C.textPri, lineHeight: 1.45 }}>{nextBestTask.text}</div>
+                  <Label tone="orange">? Tiny Start</Label>
+                  <div style={{ fontSize: 20, fontWeight: 750, color: C.textPri, lineHeight: 1.35 }}>{nextBestTask.text}</div>
                 </div>
-                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: C.green, color: '#07120a', border: 'none', borderRadius: 16, padding: '12px 16px', minHeight: 44, fontWeight: 850, fontSize: 13, cursor: 'pointer', flexShrink: 0, boxShadow: '0 10px 22px rgba(34,197,94,0.22)' }}>Start</button>
+                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '13px 18px', minHeight: 48, fontWeight: 850, fontSize: 14, cursor: 'pointer', flexShrink: 0, boxShadow: '0 12px 24px rgba(249,115,22,0.22)' }}>Start Now</button>
               </div>
             )}
 
             {!nextBestTask && (
-              <div style={{ background: 'linear-gradient(135deg,#1a2030 0%,#0f1520 100%)', border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 24, padding: '18px 20px', boxShadow: '0 14px 34px rgba(0,0,0,0.16)' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: C.orange, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 7 }}>All tasks done</div>
-                <div style={{ fontSize: 14, color: C.textSec, marginBottom: 14, lineHeight: 1.5 }}>Great work. Start a focus session or set a new tiny start.</div>
+              <div style={{ background: 'linear-gradient(135deg,#1a2030 0%,#0f1520 100%)', border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 28, padding: '20px', boxShadow: '0 18px 40px rgba(0,0,0,0.20)' }}>
+                <div style={{ fontSize: 12, fontWeight: 850, color: C.orange, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 8 }}>All tasks done</div>
+                <div style={{ fontSize: 15, color: C.textSec, marginBottom: 14, lineHeight: 1.5 }}>Great work. Start a focus session or set a new tiny start.</div>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, flex: 1, padding: '12px' }}>Focus</button>
                   <button onClick={() => setTinyDone(false)} style={{ ...GhostBtn, flex: 1, padding: '12px' }}>New Start</button>
@@ -340,30 +333,56 @@ export default function App() {
               </div>
             )}
 
-            <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}><Label>Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
-              <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." disabled={tinyDone} multiline />
-              {!tinyDone && <button onClick={completeTiny} style={{ ...PrimaryBtn, marginTop: 14, background: C.orange }}>Start Now</button>}
-            </Card>
+            <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.10), rgba(22,27,38,0.96))', border: `1px solid rgba(249,115,22,0.22)`, borderRadius: 28, padding: '20px', boxShadow: '0 18px 40px rgba(0,0,0,0.18)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}><Label tone="orange">? Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
+              <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." disabled={tinyDone} multiline size="large" />
+              {!tinyDone && <button onClick={completeTiny} style={{ ...PrimaryBtn, width: 'auto', minWidth: 136, marginTop: 16, background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', borderRadius: 999, boxShadow: '0 12px 24px rgba(249,115,22,0.22)' }}>Start Now</button>}
+            </div>
 
             <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <Label>Top 3 Tasks</Label>
-                <span style={{ color: C.textMut, fontSize: 12, fontWeight: 700 }}>{doneTasks}/{tasks.length}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <Label tone="orange">? Top 3 Tasks</Label>
+                <span style={{ color: C.orange, fontSize: 12, fontWeight: 800 }}>? Reorder</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }}>
-                {tasks.slice(0, 3).map((task, i) => <TaskRow key={task.id} task={task} index={i} onToggle={() => toggleTask(task.id)} onTextChange={text => updateTaskText(task.id, text)} onFocus={() => { setFocusTask({ id: task.id, text: task.text }); setTab('focus') }} />)}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', borderRadius: 18, border: `1px solid ${C.border}` }}>
+                {tasks.slice(0, 3).map((task, i) => <TaskRow key={task.id} task={task} index={i} onToggle={() => toggleTask(task.id)} onTextChange={text => updateTaskText(task.id, text)} onFocus={() => { setFocusTask({ id: task.id, text: task.text }); setTab('focus') }} variant="numbered" />)}
               </div>
             </Card>
 
-            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '18px 20px', fontSize: 16, borderRadius: 24, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 16px 34px rgba(249,115,22,0.24)' }}>
-              <span style={{ textAlign: 'left' }}><span style={{ display: 'block', fontSize: 18, fontWeight: 850 }}>Start Focus Sprint</span><span style={{ display: 'block', fontSize: 13, opacity: 0.82, fontWeight: 600, marginTop: 4 }}>{timerSelected.label} - distraction-free</span></span>
-              <span style={{ width: 46, height: 46, borderRadius: '50%', background: 'rgba(13,15,20,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 850 }}>GO</span>
+            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '22px 24px', fontSize: 16, borderRadius: 26, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 20px 42px rgba(249,115,22,0.30)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left' }}><span style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>?</span><span><span style={{ display: 'block', fontSize: 20, fontWeight: 850 }}>Start Focus Sprint</span><span style={{ display: 'block', fontSize: 14, opacity: 0.86, fontWeight: 600, marginTop: 4 }}>{timerSelected.label} · Distraction-free</span></span></span>
+              <span style={{ width: 58, height: 58, borderRadius: '50%', background: 'rgba(13,15,20,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fbbf24', flexShrink: 0 }}>?</span>
             </button>
 
-            {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 16, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>Your Tiny Start has been updated. Keep going.</div></div>}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(156px, 1fr))', gap: 12 }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.10), rgba(22,27,38,0.96))', border: `1px solid rgba(34,197,94,0.20)`, borderRadius: 24, padding: '18px', minHeight: 132, boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}>
+                <Label tone="green">Habit Status</Label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 58, height: 58, borderRadius: '50%', border: `7px solid ${C.orange}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.textPri, fontWeight: 850, fontSize: 17 }}>{habits.filter(h => h.todayStatus === 'full' || h.todayStatus === 'partial').length}/{Math.max(habits.length, 1)}</div>
+                  <div><div style={{ color: C.textPri, fontSize: 17, fontWeight: 800, lineHeight: 1.25 }}>habits done today</div><div style={{ color: C.textSec, fontSize: 13, marginTop: 6 }}>Keep it going. ??</div></div>
+                </div>
+              </div>
+              <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.11), rgba(22,27,38,0.96))', border: `1px solid rgba(249,115,22,0.20)`, borderRadius: 24, padding: '18px', minHeight: 132, boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}>
+                <Label tone="orange">Reward Waiting</Label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 52, height: 52, borderRadius: 16, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>{nextReward?.emoji || '??'}</div>
+                  <div style={{ minWidth: 0 }}><div style={{ color: C.textSec, fontSize: 13 }}>{canClaim ? "You've earned" : nextReward ? `${Math.max(0, nextReward.cost - points)} pts to go` : 'Add a reward'}</div><div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nextReward?.name || 'Reward Bank'}</div><button onClick={() => setTab('rewards')} style={{ marginTop: 10, background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '9px 13px', fontWeight: 850, fontSize: 12, cursor: 'pointer' }}>{canClaim ? 'Claim Reward' : 'View Rewards'}</button></div>
+                </div>
+              </div>
+            </div>
 
-            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '17px 18px', borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', background: 'rgba(255,255,255,0.025)' }}><span><span style={{ display: 'block', color: C.textPri, fontSize: 16, fontWeight: 800 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 13, marginTop: 3, fontWeight: 500 }}>Clear the slate. Reset your focus.</span></span><span style={{ color: C.textMut }}>More</span></button>}
+            {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 750, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>Your Tiny Start has been updated. Keep going.</div></div>}
+
+            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '18px 20px', borderRadius: 26, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', background: 'rgba(255,255,255,0.035)', boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}><span style={{ display: 'flex', alignItems: 'center', gap: 16 }}><span style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 27 }}>?</span><span><span style={{ display: 'block', color: C.textPri, fontSize: 18, fontWeight: 850 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 14, marginTop: 3, fontWeight: 500 }}>Clear the slate. Reset your focus.</span></span></span><span style={{ color: C.textMut, fontSize: 28 }}>›</span></button>}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ color: C.textMut, fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.1, paddingLeft: 2 }}>Explore More</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                <button onClick={() => setTab('goals')} style={{ ...GhostBtn, minHeight: 50, padding: '12px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.035)', color: C.textPri }}>?? Goals</button>
+                <button onClick={() => setTab('habits')} style={{ ...GhostBtn, minHeight: 50, padding: '12px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.035)', color: C.textPri }}>?? Habits</button>
+                <button onClick={() => setTab('rewards')} style={{ ...GhostBtn, minHeight: 50, padding: '12px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.035)', color: C.textPri }}>?? Rewards</button>
+              </div>
+            </div>
 
             <details style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 24, overflow: 'hidden', boxShadow: '0 14px 34px rgba(0,0,0,0.14)' }}>
               <summary style={{ listStyle: 'none', padding: '15px 18px', color: C.textSec, fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.8, cursor: 'pointer' }}>More options</summary>
@@ -375,28 +394,7 @@ export default function App() {
                   </div>
                   <div style={{ color: C.textPri, fontSize: 30, fontWeight: 800 }}>{points}</div>
                 </div>
-
-                {nextReward ? (
-                  <div style={{ background: C.cardAlt, borderRadius: 16, padding: '14px 16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}><Label>Next Reward</Label>{canClaim && <Badge color={C.orange}>Ready!</Badge>}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      <div style={{ width: 46, height: 46, borderRadius: 14, fontSize: 12, fontWeight: 800, color: C.orange, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>WIN</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{nextReward.name}</div>
-                        <div style={{ fontSize: 12, color: C.textSec, marginBottom: 7 }}>{canClaim ? 'You can claim this now!' : `${nextReward.cost - points} pts to go`}</div>
-                        <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 6, height: 6, overflow: 'hidden' }}><div style={{ height: '100%', width: `${pctToReward}%`, background: canClaim ? C.green : C.orange, borderRadius: 6, transition: 'width 0.4s' }} /></div>
-                      </div>
-                      <div style={{ fontWeight: 800, fontSize: 16, color: canClaim ? C.green : C.orange, minWidth: 44, textAlign: 'right' }}>{points}/{nextReward.cost}</div>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ background: C.cardAlt, borderRadius: 16, padding: '14px 16px', fontSize: 13, color: C.textMut, textAlign: 'center' }}>
-                    No rewards set. <button onClick={() => setTab('rewards')} style={{ background: 'none', border: 'none', color: C.blue, cursor: 'pointer', fontWeight: 700, fontSize: 13, padding: 0 }}>Add one</button>
-                  </div>
-                )}
-
                 <button onClick={startNewDay} style={{ ...GhostBtn, padding: '13px' }}>Start New Day</button>
-
                 <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Settings</div>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -437,17 +435,13 @@ export default function App() {
       <div style={{ padding: '22px 16px 118px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 10 }}>
         <p style={{ fontSize: 11, color: C.textMut, margin: 0, lineHeight: 1.6 }}>FocusForge is a productivity support tool, not medical treatment or clinical advice.</p>
       </div>
-      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'rgba(13,15,20,0.98)', borderTop: `1px solid ${C.border}`, boxShadow: '0 -18px 44px rgba(0,0,0,0.48)', padding: '10px 12px calc(10px + env(safe-area-inset-bottom))' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
-          {tabs.map(t => {
-            const active = tab === t.id
-            return (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ background: active ? C.blueLight : 'transparent', color: active ? C.blue : C.textSec, border: active ? `1px solid rgba(96,165,250,0.35)` : '1px solid transparent', borderRadius: 18, padding: '9px 4px 8px', minHeight: 62, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: active ? 850 : 650, fontSize: 11, cursor: 'pointer', boxShadow: active ? '0 10px 20px rgba(59,130,246,0.12)' : 'none', transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease' }}>
-                <span style={{ fontSize: 21, lineHeight: 1 }}>{t.icon}</span>
-                <span>{t.label}</span>
-              </button>
-            )
-          })}
+      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'linear-gradient(180deg, rgba(22,27,38,0.96), rgba(13,15,20,0.99))', borderTop: `1px solid ${C.border}`, boxShadow: '0 -18px 44px rgba(0,0,0,0.54)', padding: '10px 12px calc(10px + env(safe-area-inset-bottom))' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr 74px 1fr 1fr', alignItems: 'end', gap: 4 }}>
+          <button onClick={() => setTab('today')} style={{ background: tab === 'today' ? C.orangeLight : 'transparent', color: tab === 'today' ? '#fbbf24' : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'today' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>☀️</span><span>Today</span></button>
+          <button onClick={() => setTab('goals')} style={{ background: tab === 'goals' ? C.blueLight : 'transparent', color: tab === 'goals' ? C.blue : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'goals' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>🎯</span><span>Goals</span></button>
+          <button onClick={() => setTab('focus')} aria-label="Start focus" style={{ width: 62, height: 62, justifySelf: 'center', marginTop: -24, borderRadius: '50%', background: `linear-gradient(135deg, ${C.orange} 0%, #ef6b4a 100%)`, color: '#fff', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 12px 28px rgba(249,115,22,0.34)', fontSize: 36, lineHeight: 1, cursor: 'pointer' }}>+</button>
+          <button onClick={() => setTab('habits')} style={{ background: tab === 'habits' ? C.greenLight : 'transparent', color: tab === 'habits' ? C.green : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'habits' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>🌿</span><span>Habits</span></button>
+          <button onClick={() => setTab('rewards')} style={{ background: tab === 'rewards' ? C.orangeLight : 'transparent', color: tab === 'rewards' ? C.orange : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'rewards' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>🎁</span><span>Rewards</span></button>
         </div>
       </nav>
     </div>
@@ -462,25 +456,29 @@ function RestartPanel({ onPick, onCancel }) {
   </div>
 }
 
-function EditableText({ value, onChange, placeholder, multiline, disabled }) {
+function EditableText({ value, onChange, placeholder, multiline, disabled, size }) {
   const [editing, setEditing] = useState(false)
   const ref = useRef()
   useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
-  if (!editing) return <div onClick={() => !disabled && setEditing(true)} style={{ fontSize: 15, color: disabled ? C.textMut : C.textPri, lineHeight: 1.6, cursor: disabled ? 'default' : 'text', padding: '13px 14px', borderRadius: 16, background: disabled ? 'transparent' : C.cardAlt, border: `1px solid ${disabled ? 'transparent' : C.border}`, minHeight: 48, display: 'flex', alignItems: 'center' }}>{value || <span style={{ color: C.textMut }}>{placeholder}</span>}{!disabled && <span style={{ marginLeft: 'auto', paddingLeft: 8, color: C.textMut, fontSize: 13 }}>✏️</span>}</div>
-  const inputStyle = { width: '100%', fontSize: 15, color: C.textPri, lineHeight: 1.6, padding: '13px 14px', borderRadius: 16, border: `1.5px solid ${C.blue}`, background: C.cardAlt, outline: 'none', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }
+  const isHero = size === 'hero'
+  const isLarge = size === 'large'
+  const textStyle = { fontSize: isHero ? 28 : isLarge ? 21 : 15, fontWeight: isHero ? 850 : isLarge ? 750 : 500, lineHeight: isHero ? 1.25 : isLarge ? 1.35 : 1.6 }
+  if (!editing) return <div onClick={() => !disabled && setEditing(true)} style={{ ...textStyle, color: disabled ? C.textMut : C.textPri, cursor: disabled ? 'default' : 'text', padding: isHero ? '4px 0' : '13px 14px', borderRadius: 16, background: isHero || disabled ? 'transparent' : C.cardAlt, border: `1px solid ${isHero || disabled ? 'transparent' : C.border}`, minHeight: isHero ? 72 : 48, display: 'flex', alignItems: 'center' }}>{value || <span style={{ color: C.textMut }}>{placeholder}</span>}{!disabled && !isHero && <span style={{ marginLeft: 'auto', paddingLeft: 8, color: C.textMut, fontSize: 13 }}>??</span>}</div>
+  const inputStyle = { width: '100%', ...textStyle, color: C.textPri, padding: isHero ? '8px 10px' : '13px 14px', borderRadius: 16, border: `1.5px solid ${C.blue}`, background: C.cardAlt, outline: 'none', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }
   return multiline ? <textarea ref={ref} value={value} rows={2} onChange={e => onChange(e.target.value)} onBlur={() => setEditing(false)} style={inputStyle} /> : <input ref={ref} value={value} onChange={e => onChange(e.target.value)} onBlur={() => setEditing(false)} style={inputStyle} />
 }
 
-function TaskRow({ task, index, onToggle, onTextChange, onFocus }) {
+function TaskRow({ task, index, onToggle, onTextChange, onFocus, variant }) {
   const [editing, setEditing] = useState(false)
   const ref = useRef()
   useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
-  return <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: task.done ? 'rgba(34,197,94,0.08)' : C.cardAlt, border: `1px solid ${task.done ? 'rgba(34,197,94,0.2)' : C.border}`, borderRadius: 18, padding: '14px 15px', minHeight: 56 }}>
-    <input type="checkbox" checked={task.done} onChange={onToggle} style={{ width: 18, height: 18, accentColor: C.green, cursor: 'pointer', flexShrink: 0 }} />
+  const numbered = variant === 'numbered'
+  return <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: task.done ? 'rgba(34,197,94,0.08)' : numbered ? 'rgba(255,255,255,0.015)' : C.cardAlt, border: numbered ? 'none' : `1px solid ${task.done ? 'rgba(34,197,94,0.2)' : C.border}`, borderBottom: numbered && index < 2 ? `1px solid ${C.border}` : numbered ? 'none' : undefined, borderRadius: numbered ? 0 : 18, padding: numbered ? '14px 16px' : '14px 15px', minHeight: 58 }}>
+    {numbered ? <button onClick={onToggle} style={{ width: 34, height: 34, borderRadius: '50%', border: 'none', background: task.done ? C.green : '#fb7b53', color: '#111318', fontWeight: 850, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}>{index + 1}</button> : <input type="checkbox" checked={task.done} onChange={onToggle} style={{ width: 18, height: 18, accentColor: C.green, cursor: 'pointer', flexShrink: 0 }} />}
     {editing ? <input ref={ref} value={task.text} onChange={e => onTextChange(e.target.value)} onBlur={() => setEditing(false)} onKeyDown={e => e.key === 'Enter' && setEditing(false)} style={{ flex: 1, fontSize: 15, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'inherit', color: C.textPri }} /> : <span onClick={() => !task.done && setEditing(true)} style={{ flex: 1, fontSize: 15, lineHeight: 1.35, color: task.done ? C.textMut : C.textPri, textDecoration: task.done ? 'line-through' : 'none', cursor: task.done ? 'default' : 'text' }}>{task.text || <span style={{ color: C.textMut }}>Task {index + 1}</span>}</span>}
     {!task.done && <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
       <span style={{ fontSize: 11, color: C.orange, fontWeight: 700 }}>+3</span>
-      <button onClick={e => { e.stopPropagation(); onFocus() }} style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 10, padding: '6px 9px', fontSize: 11, fontWeight: 800, color: C.blue, cursor: 'pointer' }}>⚡ Focus</button>
+      <button onClick={e => { e.stopPropagation(); onFocus() }} style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 10, padding: '6px 9px', fontSize: 11, fontWeight: 800, color: C.blue, cursor: 'pointer' }}>? Focus</button>
     </div>}
   </div>
 }
@@ -489,7 +487,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
   const [flash, setFlash] = useState(null)
   const [adding, setAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [form, setForm] = useState({ name: '', emoji: '🎁', cost: 3 })
+  const [form, setForm] = useState({ name: '', emoji: 'ðŸŽ', cost: 3 })
   const [formError, setFormError] = useState(null)
   const nameRef = useRef()
   useEffect(() => { if ((adding || editingId) && nameRef.current) nameRef.current.focus() }, [adding, editingId])
@@ -502,7 +500,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
 
   function startAdd() {
     setEditingId(null)
-    setForm({ name: '', emoji: '🎁', cost: 3 })
+    setForm({ name: '', emoji: 'ðŸŽ', cost: 3 })
     setAdding(true)
   }
 
@@ -519,7 +517,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
     if (!name) { setFormError('Reward name is required.'); return }
     if (Number(form.cost) < 1) { setFormError('Point cost must be at least 1.'); return }
     setFormError(null)
-    setRewards(prev => [...prev, { id: Date.now(), name, emoji: form.emoji || '🎁', cost: Math.max(1, Number(form.cost) || 3) }])
+    setRewards(prev => [...prev, { id: Date.now(), name, emoji: form.emoji || 'ðŸŽ', cost: Math.max(1, Number(form.cost) || 3) }])
     setAdding(false)
   }
 
@@ -528,7 +526,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
     if (!name) { setFormError('Reward name is required.'); return }
     if (Number(form.cost) < 1) { setFormError('Point cost must be at least 1.'); return }
     setFormError(null)
-    setRewards(prev => prev.map(r => r.id === editingId ? { ...r, name, emoji: form.emoji || '🎁', cost: Math.max(1, Number(form.cost) || 3) } : r))
+    setRewards(prev => prev.map(r => r.id === editingId ? { ...r, name, emoji: form.emoji || 'ðŸŽ', cost: Math.max(1, Number(form.cost) || 3) } : r))
     setEditingId(null)
   }
 
@@ -536,7 +534,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
 
   const formCard = (onSave) => (
     <div style={{ background: C.card, borderRadius: 20, padding: '16px 18px', border: `1.5px solid ${C.blue}` }}>
-      <Label>{editingId ? '✏️ Edit Reward' : '✨ New Reward'}</Label>
+      <Label>{editingId ? 'âœï¸ Edit Reward' : 'âœ¨ New Reward'}</Label>
       <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
         <input
           value={form.emoji}
@@ -579,7 +577,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
           <div style={{ color: C.textPri, fontSize: 44, fontWeight: 800, lineHeight: 1.1, marginTop: 2 }}>{points}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontSize: 44 }}>🏅</div>
+          <div style={{ fontSize: 44 }}>ðŸ…</div>
           {!adding && !editingId && (
             <button onClick={startAdd} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: 12, padding: '9px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>+ Add</button>
           )}
@@ -590,7 +588,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
 
       {rewards.length === 0 && !adding && (
         <div style={{ background: C.card, borderRadius: 20, padding: '32px 20px', border: `1px solid ${C.border}`, textAlign: 'center' }}>
-          <div style={{ fontSize: 38, marginBottom: 10 }}>🎁</div>
+          <div style={{ fontSize: 38, marginBottom: 10 }}>ðŸŽ</div>
           <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No rewards yet</div>
           <div style={{ fontSize: 13, color: C.textSec }}>Add something that actually motivates you.</div>
         </div>
@@ -622,7 +620,7 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
             </div>
             {(isClaimed || isShort) && (
               <div style={{ padding: '11px 18px', background: isClaimed ? C.greenLight : C.redLight, borderTop: `1px solid ${isClaimed ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 16 }}>{isClaimed ? '🎉' : '💪'}</span>
+                <span style={{ fontSize: 16 }}>{isClaimed ? 'ðŸŽ‰' : 'ðŸ’ª'}</span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: isClaimed ? C.green : C.red }}>{isClaimed ? `Reward claimed! Enjoy your ${reward.name}.` : 'Earn one more tiny win first.'}</span>
               </div>
             )}
@@ -694,7 +692,7 @@ function GoalsTab({ goals, setGoals }) {
 
   const GoalForm = ({ onSave }) => (
     <div style={{ background: C.card, borderRadius: 20, padding: '16px 18px', border: `1.5px solid ${C.blue}` }}>
-      <Label>{editingId ? '✏️ Edit Goal' : '🎯 New Goal'}</Label>
+      <Label>{editingId ? 'âœï¸ Edit Goal' : 'ðŸŽ¯ New Goal'}</Label>
       <div style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 4 }}>Goal name</div>
         <input ref={nameRef} value={form.name} onChange={e => { setForm(f => ({ ...f, name: e.target.value })); if (nameError) setNameError(false) }} onKeyDown={e => e.key === 'Escape' && cancelForm()} placeholder="e.g. Launch my side project" style={{ width: '100%', fontSize: 14, padding: '10px 13px', borderRadius: 12, border: `1.5px solid ${nameError ? C.red : C.blue}`, background: C.cardAlt, color: C.textPri, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
@@ -703,7 +701,7 @@ function GoalsTab({ goals, setGoals }) {
       <Field label="Why it matters" field="why" value={form.why} placeholder="What changes if you achieve this?" multiline />
       <Field label="Tiny next step" field="tinyStep" value={form.tinyStep} placeholder="The smallest possible action right now" />
       <Field label="Minimum win" field="minWin" value={form.minWin} placeholder="What counts as good enough today?" />
-      <Field label="Backup plan" field="backup" value={form.backup} placeholder="If things go wrong, I will…" />
+      <Field label="Backup plan" field="backup" value={form.backup} placeholder="If things go wrong, I willâ€¦" />
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button onClick={onSave} style={{ ...PrimaryBtn, flex: 1 }}>Save goal</button>
         <button onClick={cancelForm} style={{ ...GhostBtn, flex: 1 }}>Cancel</button>
@@ -714,7 +712,7 @@ function GoalsTab({ goals, setGoals }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontWeight: 800, fontSize: 17, color: C.textPri }}>🏆 Goals</div>
+        <div style={{ fontWeight: 800, fontSize: 17, color: C.textPri }}>ðŸ† Goals</div>
         {!adding && !editingId && <button onClick={startAdd} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: 12, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>+ Add goal</button>}
       </div>
 
@@ -722,7 +720,7 @@ function GoalsTab({ goals, setGoals }) {
 
       {goals.length === 0 && !adding && (
         <div style={{ background: C.card, borderRadius: 20, padding: '32px 20px', border: `1px solid ${C.border}`, textAlign: 'center' }}>
-          <div style={{ fontSize: 38, marginBottom: 10 }}>🎯</div>
+          <div style={{ fontSize: 38, marginBottom: 10 }}>ðŸŽ¯</div>
           <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No goals yet</div>
           <div style={{ fontSize: 13, color: C.textSec }}>Add a goal to break it down and make it real.</div>
         </div>
@@ -746,7 +744,7 @@ function GoalsTab({ goals, setGoals }) {
               {goal.minWin && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Min win: </span>{goal.minWin}</div>}
               {goal.backup && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Backup: </span>{goal.backup}</div>}
               <button onClick={() => toggleBreakdown(goal.id)} style={{ marginTop: 8, background: isExpanded ? C.blueLight : C.cardAlt, color: isExpanded ? C.blue : C.textSec, border: `1px solid ${isExpanded ? C.blue : C.border}`, borderRadius: 10, padding: '7px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
-                {isExpanded ? '▲ Hide breakdown' : '🧩 Break It Down'}
+                {isExpanded ? 'â–² Hide breakdown' : 'ðŸ§© Break It Down'}
               </button>
             </div>
             {isExpanded && (
@@ -776,10 +774,10 @@ function HabitsTab({ habits, setHabits, onPoints }) {
   function addHabit() { const name = newName.trim(); if (!name) { setNameError(true); return } setNameError(false); setHabits(prev => [...prev, { id: Date.now(), name, streak: 0, todayStatus: null, skipMsg: null }]); setNewName(''); setAdding(false) }
   function markHabit(id, status) { setHabits(prev => prev.map(h => { if (h.id !== id) return h; if (h.todayStatus === status) return h; const wasPartial = h.todayStatus === 'partial'; const wasFull = h.todayStatus === 'full'; if (status === 'full') { if (wasPartial) onPoints(2); else onPoints(3); return { ...h, todayStatus: 'full', streak: h.streak + 1, skipMsg: null } } if (status === 'partial') { if (wasFull) onPoints(-2); else onPoints(1); return { ...h, todayStatus: 'partial', streak: h.streak + 1, skipMsg: null } } if (status === 'skip') { if (wasFull) onPoints(-3); if (wasPartial) onPoints(-1); return { ...h, todayStatus: 'skip', skipMsg: SKIP_MESSAGES[Math.floor(Math.random() * SKIP_MESSAGES.length)] } } return h })) }
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ fontWeight: 800, fontSize: 17, color: C.textPri }}>🔁 Habits</div>{!adding && <button onClick={() => setAdding(true)} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: 12, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>+ Add habit</button>}</div>
-    {adding && <Card><Label>New habit</Label><input ref={inputRef} value={newName} onChange={e => { setNewName(e.target.value); if (nameError) setNameError(false) }} onKeyDown={e => { if (e.key === 'Enter') addHabit(); if (e.key === 'Escape') { setAdding(false); setNameError(false) } }} placeholder="e.g. Drink water, Read, Exercise…" style={{ width: '100%', fontSize: 14, padding: '11px 13px', borderRadius: 12, border: `1.5px solid ${nameError ? C.red : C.blue}`, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: nameError ? 4 : 10, background: C.cardAlt, color: C.textPri }} />{nameError && <div style={{ fontSize: 12, color: C.red, marginBottom: 8 }}>Habit name is required.</div>}<div style={{ display: 'flex', gap: 8 }}><button onClick={addHabit} style={{ ...PrimaryBtn, flex: 1 }}>Add</button><button onClick={() => { setAdding(false); setNewName(''); setNameError(false) }} style={{ ...GhostBtn, flex: 1 }}>Cancel</button></div></Card>}
-    {habits.length === 0 && !adding && <Card><div style={{ textAlign: 'center', padding: '24px 0' }}><div style={{ fontSize: 38, marginBottom: 10 }}>🌱</div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No habits yet</div><div style={{ fontSize: 13, color: C.textSec }}>Add your first habit above to get started.</div></div></Card>}
-    {habits.map(habit => <div key={habit.id} style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}><div style={{ padding: '14px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{habit.name}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>{habit.streak > 0 ? `🔥 ${habit.streak} day streak` : 'No streak yet — start today'}</div></div><button onClick={() => setHabits(prev => prev.filter(h => h.id !== habit.id))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textMut, fontSize: 16, padding: 4 }}>✕</button></div>{habit.todayStatus === 'skip' && habit.skipMsg && <div style={{ margin: '0 14px 12px', background: C.cardAlt, borderRadius: 12, padding: '10px 13px', fontSize: 13, color: C.textSec, fontStyle: 'italic' }}>{habit.skipMsg}</div>}<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: `1px solid ${C.border}` }}>{[{ status: 'full', label: '✅ Full win', pts: '+3', activeColor: C.green, activeBg: C.greenLight }, { status: 'partial', label: '⚡ Partial win', pts: '+1', activeColor: C.orange, activeBg: C.orangeLight }, { status: 'skip', label: '🤍 Skip', pts: '', activeColor: C.textSec, activeBg: C.cardAlt }].map((btn, i) => { const active = habit.todayStatus === btn.status; return <button key={btn.status} onClick={() => markHabit(habit.id, btn.status)} style={{ background: active ? btn.activeBg : 'transparent', border: 'none', borderRight: i < 2 ? `1px solid ${C.border}` : 'none', padding: '13px 4px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}><span style={{ fontSize: 12, fontWeight: 700, color: active ? btn.activeColor : C.textSec }}>{btn.label}</span>{btn.pts && <span style={{ fontSize: 11, color: active ? btn.activeColor : C.textMut, fontWeight: 600 }}>{btn.pts} pts</span>}</button> })}</div></div>)}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ fontWeight: 800, fontSize: 17, color: C.textPri }}>ðŸ” Habits</div>{!adding && <button onClick={() => setAdding(true)} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: 12, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>+ Add habit</button>}</div>
+    {adding && <Card><Label>New habit</Label><input ref={inputRef} value={newName} onChange={e => { setNewName(e.target.value); if (nameError) setNameError(false) }} onKeyDown={e => { if (e.key === 'Enter') addHabit(); if (e.key === 'Escape') { setAdding(false); setNameError(false) } }} placeholder="e.g. Drink water, Read, Exerciseâ€¦" style={{ width: '100%', fontSize: 14, padding: '11px 13px', borderRadius: 12, border: `1.5px solid ${nameError ? C.red : C.blue}`, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: nameError ? 4 : 10, background: C.cardAlt, color: C.textPri }} />{nameError && <div style={{ fontSize: 12, color: C.red, marginBottom: 8 }}>Habit name is required.</div>}<div style={{ display: 'flex', gap: 8 }}><button onClick={addHabit} style={{ ...PrimaryBtn, flex: 1 }}>Add</button><button onClick={() => { setAdding(false); setNewName(''); setNameError(false) }} style={{ ...GhostBtn, flex: 1 }}>Cancel</button></div></Card>}
+    {habits.length === 0 && !adding && <Card><div style={{ textAlign: 'center', padding: '24px 0' }}><div style={{ fontSize: 38, marginBottom: 10 }}>ðŸŒ±</div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No habits yet</div><div style={{ fontSize: 13, color: C.textSec }}>Add your first habit above to get started.</div></div></Card>}
+    {habits.map(habit => <div key={habit.id} style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}><div style={{ padding: '14px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{habit.name}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>{habit.streak > 0 ? `ðŸ”¥ ${habit.streak} day streak` : 'No streak yet â€” start today'}</div></div><button onClick={() => setHabits(prev => prev.filter(h => h.id !== habit.id))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textMut, fontSize: 16, padding: 4 }}>âœ•</button></div>{habit.todayStatus === 'skip' && habit.skipMsg && <div style={{ margin: '0 14px 12px', background: C.cardAlt, borderRadius: 12, padding: '10px 13px', fontSize: 13, color: C.textSec, fontStyle: 'italic' }}>{habit.skipMsg}</div>}<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: `1px solid ${C.border}` }}>{[{ status: 'full', label: 'âœ… Full win', pts: '+3', activeColor: C.green, activeBg: C.greenLight }, { status: 'partial', label: 'âš¡ Partial win', pts: '+1', activeColor: C.orange, activeBg: C.orangeLight }, { status: 'skip', label: 'ðŸ¤ Skip', pts: '', activeColor: C.textSec, activeBg: C.cardAlt }].map((btn, i) => { const active = habit.todayStatus === btn.status; return <button key={btn.status} onClick={() => markHabit(habit.id, btn.status)} style={{ background: active ? btn.activeBg : 'transparent', border: 'none', borderRight: i < 2 ? `1px solid ${C.border}` : 'none', padding: '13px 4px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}><span style={{ fontSize: 12, fontWeight: 700, color: active ? btn.activeColor : C.textSec }}>{btn.label}</span>{btn.pts && <span style={{ fontSize: 11, color: active ? btn.activeColor : C.textMut, fontWeight: 600 }}>{btn.pts} pts</span>}</button> })}</div></div>)}
   </div>
 }
 
@@ -816,29 +814,29 @@ function FocusTimer({ selected, setSelected, timeLeft, running, completed, claim
   const dashOffset = circ * (1 - pct)
   const ringColor = completed ? C.green : running ? C.blue : C.orange
   const stuckOptions = [
-    { emoji: '✂️', label: 'Make this task smaller', tip: 'What is the single next physical action? Do only that.', action: null },
-    { emoji: '⏱', label: 'Switch to 5-minute mode', tip: null, action: () => { setSelected(DURATIONS[0]); setStuckOpen(false) } },
-    { emoji: '🧘', label: 'Take a quick reset break', tip: 'Step away 5 min. Breathe, stretch, then come back fresh.', action: null },
-    { emoji: '🔄', label: 'Return to Today & Restart My Day', tip: null, action: () => { onRestartDay(); setStuckOpen(false) } },
+    { emoji: 'âœ‚ï¸', label: 'Make this task smaller', tip: 'What is the single next physical action? Do only that.', action: null },
+    { emoji: 'â±', label: 'Switch to 5-minute mode', tip: null, action: () => { setSelected(DURATIONS[0]); setStuckOpen(false) } },
+    { emoji: 'ðŸ§˜', label: 'Take a quick reset break', tip: 'Step away 5 min. Breathe, stretch, then come back fresh.', action: null },
+    { emoji: 'ðŸ”„', label: 'Return to Today & Restart My Day', tip: null, action: () => { onRestartDay(); setStuckOpen(false) } },
   ]
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-    {focusTask && <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 16, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}><div><div style={{ fontSize: 11, fontWeight: 700, color: C.blue, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>Focusing on</div><div style={{ fontSize: 14, fontWeight: 700, color: C.textPri }}>{focusTask.text}</div></div><button onClick={onClearFocusTask} style={{ background: 'none', border: 'none', color: C.textMut, fontSize: 16, cursor: 'pointer', padding: 4, flexShrink: 0 }}>✕</button></div>}
-    {isIdle && <Card><Label>⏱ Choose session length</Label><div style={{ display: 'flex', gap: 10 }}>{DURATIONS.map(d => <button key={d.label} onClick={() => setSelected(d)} style={{ flex: 1, background: selected === d ? C.blue : C.cardAlt, color: selected === d ? '#fff' : C.textSec, border: `1px solid ${selected === d ? C.blue : C.border}`, borderRadius: 14, padding: '15px 6px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{d.label}<span style={{ display: 'block', fontSize: 11, marginTop: 3, fontWeight: 500, color: selected === d ? 'rgba(255,255,255,0.7)' : C.textMut }}>+{d.pts} pts</span></button>)}</div><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.border}` }}><div><div style={{ fontSize: 13, fontWeight: 600, color: C.textSec }}>🔔 Sound & haptic feedback</div><div style={{ fontSize: 11, color: C.textMut, marginTop: 2 }}>Plays a chime when your session ends</div></div><button onClick={() => setFeedbackOn(v => !v)} style={{ background: feedbackOn ? C.blue : C.cardAlt, border: `1.5px solid ${feedbackOn ? C.blue : C.border}`, borderRadius: 20, width: 48, height: 26, cursor: 'pointer', position: 'relative', transition: 'background 0.2s, border-color 0.2s', flexShrink: 0 }}><div style={{ position: 'absolute', top: 3, left: feedbackOn ? 24 : 4, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} /></button></div></Card>}
+    {focusTask && <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 16, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}><div><div style={{ fontSize: 11, fontWeight: 700, color: C.blue, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>Focusing on</div><div style={{ fontSize: 14, fontWeight: 700, color: C.textPri }}>{focusTask.text}</div></div><button onClick={onClearFocusTask} style={{ background: 'none', border: 'none', color: C.textMut, fontSize: 16, cursor: 'pointer', padding: 4, flexShrink: 0 }}>âœ•</button></div>}
+    {isIdle && <Card><Label>â± Choose session length</Label><div style={{ display: 'flex', gap: 10 }}>{DURATIONS.map(d => <button key={d.label} onClick={() => setSelected(d)} style={{ flex: 1, background: selected === d ? C.blue : C.cardAlt, color: selected === d ? '#fff' : C.textSec, border: `1px solid ${selected === d ? C.blue : C.border}`, borderRadius: 14, padding: '15px 6px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{d.label}<span style={{ display: 'block', fontSize: 11, marginTop: 3, fontWeight: 500, color: selected === d ? 'rgba(255,255,255,0.7)' : C.textMut }}>+{d.pts} pts</span></button>)}</div><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.border}` }}><div><div style={{ fontSize: 13, fontWeight: 600, color: C.textSec }}>ðŸ”” Sound & haptic feedback</div><div style={{ fontSize: 11, color: C.textMut, marginTop: 2 }}>Plays a chime when your session ends</div></div><button onClick={() => setFeedbackOn(v => !v)} style={{ background: feedbackOn ? C.blue : C.cardAlt, border: `1.5px solid ${feedbackOn ? C.blue : C.border}`, borderRadius: 20, width: 48, height: 26, cursor: 'pointer', position: 'relative', transition: 'background 0.2s, border-color 0.2s', flexShrink: 0 }}><div style={{ position: 'absolute', top: 3, left: feedbackOn ? 24 : 4, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} /></button></div></Card>}
     <div style={{ background: completed ? 'rgba(34,197,94,0.06)' : C.card, border: `1px solid ${completed ? 'rgba(34,197,94,0.2)' : C.border}`, borderRadius: 24, padding: '32px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
-      <div style={{ position: 'relative', width: 210, height: 210 }}><svg width="210" height="210" style={{ transform: 'rotate(-90deg)' }}><circle cx="105" cy="105" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="14" /><circle cx="105" cy="105" r={R} fill="none" stroke={ringColor} strokeWidth="14" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={isIdle ? circ : dashOffset} style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }} /></svg><div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>{completed ? <><div style={{ fontSize: 44 }}>✅</div><div style={{ fontSize: 14, fontWeight: 700, color: C.green, marginTop: 6 }}>Done!</div></> : <><div style={{ fontSize: 48, fontWeight: 800, color: C.textPri, letterSpacing: 1, lineHeight: 1 }}>{mins}:{secs}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 6 }}>{isIdle ? selected.label : running ? 'Stay focused' : 'Paused'}</div></>}</div></div>
+      <div style={{ position: 'relative', width: 210, height: 210 }}><svg width="210" height="210" style={{ transform: 'rotate(-90deg)' }}><circle cx="105" cy="105" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="14" /><circle cx="105" cy="105" r={R} fill="none" stroke={ringColor} strokeWidth="14" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={isIdle ? circ : dashOffset} style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }} /></svg><div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>{completed ? <><div style={{ fontSize: 44 }}>âœ…</div><div style={{ fontSize: 14, fontWeight: 700, color: C.green, marginTop: 6 }}>Done!</div></> : <><div style={{ fontSize: 48, fontWeight: 800, color: C.textPri, letterSpacing: 1, lineHeight: 1 }}>{mins}:{secs}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 6 }}>{isIdle ? selected.label : running ? 'Stay focused' : 'Paused'}</div></>}</div></div>
       {completed ? (claimed
-        ? <div style={{ textAlign: 'center' }}><div style={{ background: C.orange, color: '#fff', borderRadius: 16, padding: '14px 28px', fontWeight: 800, fontSize: 17, letterSpacing: 0.3 }}>{partial ? '⚡ Partial win logged.' : '🔥 Momentum protected'}</div><div style={{ color: C.green, fontWeight: 700, fontSize: 14, marginTop: 10 }}>+{partial ? 1 : selected.pts} pts added!</div><button onClick={onReset} style={{ ...GhostBtn, marginTop: 14 }}>Start another session</button></div>
-        : <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}><div style={{ fontSize: 15, fontWeight: 700, color: C.textPri }}>Session complete — claim your reward</div><button onClick={onClaim} style={{ ...PrimaryBtn, background: C.green }}>Claim +{selected.pts} pts</button><button onClick={onReset} style={GhostBtn}>Discard</button></div>)
+        ? <div style={{ textAlign: 'center' }}><div style={{ background: C.orange, color: '#fff', borderRadius: 16, padding: '14px 28px', fontWeight: 800, fontSize: 17, letterSpacing: 0.3 }}>{partial ? 'âš¡ Partial win logged.' : 'ðŸ”¥ Momentum protected'}</div><div style={{ color: C.green, fontWeight: 700, fontSize: 14, marginTop: 10 }}>+{partial ? 1 : selected.pts} pts added!</div><button onClick={onReset} style={{ ...GhostBtn, marginTop: 14 }}>Start another session</button></div>
+        : <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}><div style={{ fontSize: 15, fontWeight: 700, color: C.textPri }}>Session complete â€” claim your reward</div><button onClick={onClaim} style={{ ...PrimaryBtn, background: C.green }}>Claim +{selected.pts} pts</button><button onClick={onReset} style={GhostBtn}>Discard</button></div>)
         : isIdle
-          ? <button onClick={onStart} style={{ ...PrimaryBtn, width: 180, padding: '15px' }}>▶ Start</button>
+          ? <button onClick={onStart} style={{ ...PrimaryBtn, width: 180, padding: '15px' }}>â–¶ Start</button>
           : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
-              <div style={{ display: 'flex', gap: 12 }}>{running ? <button onClick={onPause} style={{ ...PrimaryBtn, flex: 1 }}>⏸ Pause</button> : <button onClick={onResume} style={{ ...PrimaryBtn, flex: 1 }}>▶ Resume</button>}<button onClick={onReset} style={{ ...GhostBtn, flex: 1 }}>↺ Reset</button></div>
-              {running && <button onClick={onEndEarly} style={{ background: 'rgba(249,115,22,0.12)', border: `1px solid rgba(249,115,22,0.3)`, borderRadius: 14, padding: '11px', color: C.orange, fontWeight: 700, fontSize: 13, cursor: 'pointer', width: '100%' }}>⚡ End early — partial win (+1 pt)</button>}
+              <div style={{ display: 'flex', gap: 12 }}>{running ? <button onClick={onPause} style={{ ...PrimaryBtn, flex: 1 }}>â¸ Pause</button> : <button onClick={onResume} style={{ ...PrimaryBtn, flex: 1 }}>â–¶ Resume</button>}<button onClick={onReset} style={{ ...GhostBtn, flex: 1 }}>â†º Reset</button></div>
+              {running && <button onClick={onEndEarly} style={{ background: 'rgba(249,115,22,0.12)', border: `1px solid rgba(249,115,22,0.3)`, borderRadius: 14, padding: '11px', color: C.orange, fontWeight: 700, fontSize: 13, cursor: 'pointer', width: '100%' }}>âš¡ End early â€” partial win (+1 pt)</button>}
             </div>}
     </div>
-    {!isIdle && !completed && <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '13px 16px', fontSize: 13, color: C.textSec, textAlign: 'center', fontStyle: 'italic' }}>Every minute counts. Keep going. 💪</div>}
+    {!isIdle && !completed && <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '13px 16px', fontSize: 13, color: C.textSec, textAlign: 'center', fontStyle: 'italic' }}>Every minute counts. Keep going. ðŸ’ª</div>}
     {!isIdle && !completed && <>
-      <button onClick={() => setStuckOpen(v => !v)} style={{ background: stuckOpen ? C.cardAlt : 'transparent', border: `1.5px solid ${C.border}`, borderRadius: 16, padding: '12px 20px', color: C.textSec, fontWeight: 600, fontSize: 14, cursor: 'pointer', width: '100%' }}>{stuckOpen ? '▲ Close' : "🤔 I'm stuck"}</button>
+      <button onClick={() => setStuckOpen(v => !v)} style={{ background: stuckOpen ? C.cardAlt : 'transparent', border: `1.5px solid ${C.border}`, borderRadius: 16, padding: '12px 20px', color: C.textSec, fontWeight: 600, fontSize: 14, cursor: 'pointer', width: '100%' }}>{stuckOpen ? 'â–² Close' : "ðŸ¤” I'm stuck"}</button>
       {stuckOpen && <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px 10px', borderBottom: `1px solid ${C.border}` }}><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>What's getting in the way?</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>Pick what fits right now.</div></div>
         {stuckOptions.map((opt, i) => <div key={i} style={{ borderBottom: i < stuckOptions.length - 1 ? `1px solid ${C.border}` : 'none' }}><button onClick={opt.action || undefined} style={{ width: '100%', background: 'transparent', border: 'none', padding: '13px 18px', cursor: opt.action ? 'pointer' : 'default', display: 'flex', alignItems: 'flex-start', gap: 12, textAlign: 'left' }}><span style={{ fontSize: 18, width: 36, height: 36, borderRadius: 10, background: C.cardAlt, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{opt.emoji}</span><div><div style={{ fontSize: 14, fontWeight: 600, color: C.textPri }}>{opt.label}</div>{opt.tip && <div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>{opt.tip}</div>}</div></button></div>)}
@@ -847,8 +845,8 @@ function FocusTimer({ selected, setSelected, timeLeft, running, completed, claim
   </div>
 }
 
-function Card({ children }) { return <div style={{ background: 'rgba(22,27,38,0.96)', borderRadius: 24, padding: '20px', border: `1px solid ${C.border}`, boxShadow: '0 14px 34px rgba(0,0,0,0.16)' }}>{children}</div> }
-function Label({ children }) { return <div style={{ fontWeight: 800, fontSize: 12, color: C.textSec, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 12 }}>{children}</div> }
+function Card({ children, variant }) { return <div style={{ background: variant === 'goal' ? 'linear-gradient(135deg, rgba(255,255,255,0.055), rgba(22,27,38,0.96))' : 'rgba(22,27,38,0.96)', borderRadius: 28, padding: variant === 'goal' ? '24px 22px' : '20px', border: `1px solid ${C.border}`, boxShadow: '0 18px 40px rgba(0,0,0,0.20)' }}>{children}</div> }
+function Label({ children, tone }) { return <div style={{ fontWeight: 850, fontSize: 12, color: tone === 'orange' ? C.orange : tone === 'green' ? '#9fb58d' : C.textSec, textTransform: 'uppercase', letterSpacing: 1.15, marginBottom: 12 }}>{children}</div> }
 function Badge({ children, color }) { return <div style={{ background: color + '22', color, borderRadius: 20, padding: '4px 11px', fontSize: 11, fontWeight: 800 }}>{children}</div> }
 function Empty({ children }) { return <p style={{ color: C.textMut, fontSize: 14, margin: 0 }}>{children}</p> }
 
