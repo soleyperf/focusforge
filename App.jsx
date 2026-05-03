@@ -276,7 +276,7 @@ export default function App() {
   const canClaim = nextReward ? points >= nextReward.cost : false
 
   return (
-    <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: `radial-gradient(circle at 50% -10%, ${C.blueLight} 0%, transparent 34%), ${C.bg}` }}>
+    <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', minHeight: '100dvh', background: `radial-gradient(circle at 50% -10%, ${C.blueLight} 0%, transparent 34%), ${C.bg}` }}>
       <div style={{ background: 'rgba(13,15,20,0.94)', borderBottom: `1px solid ${C.border}`, padding: '26px 22px 18px', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 10px 28px rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 style={{ margin: 0, fontSize: 34, fontWeight: 900, color: C.textPri, letterSpacing: -1.2, lineHeight: 1 }}><span>Focus</span><span style={{ color: '#fb7b53' }}>Forge</span></h1>
