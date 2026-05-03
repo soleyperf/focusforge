@@ -283,30 +283,30 @@ export default function App() {
   const canClaim = nextReward ? points >= nextReward.cost : false
 
   return (
-    <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: C.bg }}>
-      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: '18px 20px', position: 'sticky', top: 0, zIndex: 10 }}>
+    <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: `radial-gradient(circle at 50% -10%, ${C.blueLight} 0%, transparent 34%), ${C.bg}` }}>
+      <div style={{ background: 'rgba(22,27,38,0.96)', borderBottom: `1px solid ${C.border}`, padding: '20px 22px', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 10px 28px rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.textPri, letterSpacing: 0.3 }}><span style={{ color: C.blue }}>Focus</span>Forge</h1>
+          <h1 style={{ margin: 0, fontSize: 21, fontWeight: 850, color: C.textPri, letterSpacing: 0.1 }}><span style={{ color: C.blue }}>Focus</span>Forge</h1>
           {(timerRunning || (timerCompleted && !timerClaimed)) && (
             <button onClick={() => setTab('focus')} style={{ background: timerCompleted ? C.greenLight : C.blueLight, border: `1px solid ${timerCompleted ? C.green : C.blue}`, borderRadius: 24, padding: '5px 12px', fontWeight: 700, fontSize: 12, color: timerCompleted ? C.green : C.blue, cursor: 'pointer', letterSpacing: 0.2, flexShrink: 0 }}>
               {timerCompleted ? '✅ Claim session' : `⏱ ${timerMins}:${timerSecs}`}
             </button>
           )}
-          <div style={{ background: C.orange, borderRadius: 24, padding: '5px 14px', fontWeight: 800, fontSize: 13, color: '#fff', letterSpacing: 0.3 }}>{points} pts</div>
+          <div style={{ background: C.orange, borderRadius: 24, padding: '7px 14px', fontWeight: 800, fontSize: 13, color: '#fff', letterSpacing: 0.3, boxShadow: '0 8px 18px rgba(249,115,22,0.22)' }}>{points} pts</div>
         </div>
       </div>
 
-      <div style={{ padding: '16px 14px 104px' }}>
+      <div style={{ padding: '20px 16px 112px' }}>
         {tab === 'today' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ padding: '10px 4px 2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div style={{ padding: '14px 6px 4px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: C.orange, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 8 }}>FocusForge</div>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: C.textPri, lineHeight: 1.15, letterSpacing: -0.4 }}>Good morning.</div>
-                  <div style={{ fontSize: 14, color: C.textSec, lineHeight: 1.5, marginTop: 5 }}>You don't need to do everything. Just what matters today.</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: C.orange, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 9 }}>FocusForge</div>
+                  <div style={{ fontSize: 31, fontWeight: 850, color: C.textPri, lineHeight: 1.08, letterSpacing: -0.8 }}>Good morning.</div>
+                  <div style={{ fontSize: 15, color: C.textSec, lineHeight: 1.55, marginTop: 8, maxWidth: 290 }}>You don't need to do everything. Just what matters today.</div>
                 </div>
-                <div style={{ background: C.orangeLight, border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 18, padding: '9px 13px', color: C.orange, fontWeight: 800, fontSize: 15, whiteSpace: 'nowrap' }}>{points} pts</div>
+                <div style={{ background: C.orangeLight, border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 20, padding: '10px 14px', color: C.orange, fontWeight: 850, fontSize: 15, whiteSpace: 'nowrap' }}>{points} pts</div>
               </div>
             </div>
 
@@ -320,30 +320,30 @@ export default function App() {
             </Card>
 
             {nextBestTask && (
-              <div style={{ background: 'linear-gradient(135deg,#182818 0%,#101c12 100%)', border: `1px solid rgba(34,197,94,0.22)`, borderRadius: 20, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ background: 'linear-gradient(135deg,#182818 0%,#101c12 100%)', border: `1px solid rgba(34,197,94,0.22)`, borderRadius: 24, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, boxShadow: '0 14px 34px rgba(0,0,0,0.18)' }}>
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: C.green, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Next Best Action</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: C.textPri, lineHeight: 1.35 }}>{nextBestTask.text}</div>
+                  <div style={{ fontSize: 11, fontWeight: 850, color: C.green, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 7 }}>Next Best Action</div>
+                  <div style={{ fontSize: 15, fontWeight: 750, color: C.textPri, lineHeight: 1.45 }}>{nextBestTask.text}</div>
                 </div>
-                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: C.green, color: '#07120a', border: 'none', borderRadius: 14, padding: '10px 13px', fontWeight: 800, fontSize: 13, cursor: 'pointer', flexShrink: 0 }}>Start</button>
+                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: C.green, color: '#07120a', border: 'none', borderRadius: 16, padding: '12px 16px', minHeight: 44, fontWeight: 850, fontSize: 13, cursor: 'pointer', flexShrink: 0, boxShadow: '0 10px 22px rgba(34,197,94,0.22)' }}>Start</button>
               </div>
             )}
 
             {!nextBestTask && (
-              <div style={{ background: 'linear-gradient(135deg,#1a2030 0%,#0f1520 100%)', border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 20, padding: '16px 18px' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.orange, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>All tasks done</div>
-                <div style={{ fontSize: 14, color: C.textSec, marginBottom: 12 }}>Great work. Start a focus session or set a new tiny start.</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, flex: 1, padding: '11px' }}>Focus</button>
-                  <button onClick={() => setTinyDone(false)} style={{ ...GhostBtn, flex: 1, padding: '11px' }}>New Start</button>
+              <div style={{ background: 'linear-gradient(135deg,#1a2030 0%,#0f1520 100%)', border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 24, padding: '18px 20px', boxShadow: '0 14px 34px rgba(0,0,0,0.16)' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: C.orange, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 7 }}>All tasks done</div>
+                <div style={{ fontSize: 14, color: C.textSec, marginBottom: 14, lineHeight: 1.5 }}>Great work. Start a focus session or set a new tiny start.</div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, flex: 1, padding: '12px' }}>Focus</button>
+                  <button onClick={() => setTinyDone(false)} style={{ ...GhostBtn, flex: 1, padding: '12px' }}>New Start</button>
                 </div>
               </div>
             )}
 
             <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label>Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}><Label>Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
               <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." disabled={tinyDone} multiline />
-              {!tinyDone && <button onClick={completeTiny} style={{ ...PrimaryBtn, marginTop: 12, background: C.orange }}>Start Now</button>}
+              {!tinyDone && <button onClick={completeTiny} style={{ ...PrimaryBtn, marginTop: 14, background: C.orange }}>Start Now</button>}
             </Card>
 
             <Card>
@@ -351,21 +351,21 @@ export default function App() {
                 <Label>Top 3 Tasks</Label>
                 <span style={{ color: C.textMut, fontSize: 12, fontWeight: 700 }}>{doneTasks}/{tasks.length}</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }}>
                 {tasks.slice(0, 3).map((task, i) => <TaskRow key={task.id} task={task} index={i} onToggle={() => toggleTask(task.id)} onTextChange={text => updateTaskText(task.id, text)} onFocus={() => { setFocusTask({ id: task.id, text: task.text }); setTab('focus') }} />)}
               </div>
             </Card>
 
-            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '16px 18px', fontSize: 16, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ textAlign: 'left' }}><span style={{ display: 'block', fontSize: 17 }}>Start Focus Sprint</span><span style={{ display: 'block', fontSize: 12, opacity: 0.78, fontWeight: 500, marginTop: 2 }}>{timerSelected.label} - distraction-free</span></span>
-              <span style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(13,15,20,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800 }}>GO</span>
+            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '18px 20px', fontSize: 16, borderRadius: 24, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 16px 34px rgba(249,115,22,0.24)' }}>
+              <span style={{ textAlign: 'left' }}><span style={{ display: 'block', fontSize: 18, fontWeight: 850 }}>Start Focus Sprint</span><span style={{ display: 'block', fontSize: 13, opacity: 0.82, fontWeight: 600, marginTop: 4 }}>{timerSelected.label} - distraction-free</span></span>
+              <span style={{ width: 46, height: 46, borderRadius: '50%', background: 'rgba(13,15,20,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 850 }}>GO</span>
             </button>
 
             {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 16, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>Your Tiny Start has been updated. Keep going.</div></div>}
 
-            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '15px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left' }}><span><span style={{ display: 'block', color: C.textPri, fontSize: 15 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 12, marginTop: 2, fontWeight: 500 }}>Clear the slate. Reset your focus.</span></span><span style={{ color: C.textMut }}>More</span></button>}
+            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '17px 18px', borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', background: 'rgba(255,255,255,0.025)' }}><span><span style={{ display: 'block', color: C.textPri, fontSize: 16, fontWeight: 800 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 13, marginTop: 3, fontWeight: 500 }}>Clear the slate. Reset your focus.</span></span><span style={{ color: C.textMut }}>More</span></button>}
 
-            <details style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, overflow: 'hidden' }}>
+            <details style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 24, overflow: 'hidden', boxShadow: '0 14px 34px rgba(0,0,0,0.14)' }}>
               <summary style={{ listStyle: 'none', padding: '15px 18px', color: C.textSec, fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.8, cursor: 'pointer' }}>More options</summary>
               <div style={{ borderTop: `1px solid ${C.border}`, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ background: C.cardAlt, borderRadius: 16, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -434,16 +434,16 @@ export default function App() {
           />
         )}
       </div>
-      <div style={{ padding: '20px 16px 112px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 8 }}>
+      <div style={{ padding: '22px 16px 118px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 10 }}>
         <p style={{ fontSize: 11, color: C.textMut, margin: 0, lineHeight: 1.6 }}>FocusForge is a productivity support tool, not medical treatment or clinical advice.</p>
       </div>
-      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'rgba(13,15,20,0.96)', borderTop: `1px solid ${C.border}`, boxShadow: '0 -12px 30px rgba(0,0,0,0.35)', padding: '8px 10px calc(8px + env(safe-area-inset-bottom))' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4 }}>
+      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'rgba(13,15,20,0.98)', borderTop: `1px solid ${C.border}`, boxShadow: '0 -18px 44px rgba(0,0,0,0.48)', padding: '10px 12px calc(10px + env(safe-area-inset-bottom))' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
           {tabs.map(t => {
             const active = tab === t.id
             return (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ background: active ? C.blueLight : 'transparent', color: active ? C.blue : C.textSec, border: active ? `1px solid rgba(96,165,250,0.35)` : '1px solid transparent', borderRadius: 16, padding: '8px 4px 7px', minHeight: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, fontWeight: active ? 800 : 600, fontSize: 11, cursor: 'pointer' }}>
-                <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ background: active ? C.blueLight : 'transparent', color: active ? C.blue : C.textSec, border: active ? `1px solid rgba(96,165,250,0.35)` : '1px solid transparent', borderRadius: 18, padding: '9px 4px 8px', minHeight: 62, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: active ? 850 : 650, fontSize: 11, cursor: 'pointer', boxShadow: active ? '0 10px 20px rgba(59,130,246,0.12)' : 'none', transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease' }}>
+                <span style={{ fontSize: 21, lineHeight: 1 }}>{t.icon}</span>
                 <span>{t.label}</span>
               </button>
             )
@@ -466,8 +466,8 @@ function EditableText({ value, onChange, placeholder, multiline, disabled }) {
   const [editing, setEditing] = useState(false)
   const ref = useRef()
   useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
-  if (!editing) return <div onClick={() => !disabled && setEditing(true)} style={{ fontSize: 14, color: disabled ? C.textMut : C.textPri, lineHeight: 1.6, cursor: disabled ? 'default' : 'text', padding: '9px 12px', borderRadius: 12, background: disabled ? 'transparent' : C.cardAlt, border: `1px solid ${disabled ? 'transparent' : C.border}`, minHeight: 40, display: 'flex', alignItems: 'center' }}>{value || <span style={{ color: C.textMut }}>{placeholder}</span>}{!disabled && <span style={{ marginLeft: 'auto', paddingLeft: 8, color: C.textMut, fontSize: 13 }}>✏️</span>}</div>
-  const inputStyle = { width: '100%', fontSize: 14, color: C.textPri, lineHeight: 1.6, padding: '9px 12px', borderRadius: 12, border: `1.5px solid ${C.blue}`, background: C.cardAlt, outline: 'none', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }
+  if (!editing) return <div onClick={() => !disabled && setEditing(true)} style={{ fontSize: 15, color: disabled ? C.textMut : C.textPri, lineHeight: 1.6, cursor: disabled ? 'default' : 'text', padding: '13px 14px', borderRadius: 16, background: disabled ? 'transparent' : C.cardAlt, border: `1px solid ${disabled ? 'transparent' : C.border}`, minHeight: 48, display: 'flex', alignItems: 'center' }}>{value || <span style={{ color: C.textMut }}>{placeholder}</span>}{!disabled && <span style={{ marginLeft: 'auto', paddingLeft: 8, color: C.textMut, fontSize: 13 }}>✏️</span>}</div>
+  const inputStyle = { width: '100%', fontSize: 15, color: C.textPri, lineHeight: 1.6, padding: '13px 14px', borderRadius: 16, border: `1.5px solid ${C.blue}`, background: C.cardAlt, outline: 'none', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }
   return multiline ? <textarea ref={ref} value={value} rows={2} onChange={e => onChange(e.target.value)} onBlur={() => setEditing(false)} style={inputStyle} /> : <input ref={ref} value={value} onChange={e => onChange(e.target.value)} onBlur={() => setEditing(false)} style={inputStyle} />
 }
 
@@ -475,12 +475,12 @@ function TaskRow({ task, index, onToggle, onTextChange, onFocus }) {
   const [editing, setEditing] = useState(false)
   const ref = useRef()
   useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
-  return <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: task.done ? 'rgba(34,197,94,0.08)' : C.cardAlt, border: `1px solid ${task.done ? 'rgba(34,197,94,0.2)' : C.border}`, borderRadius: 14, padding: '12px 14px' }}>
+  return <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: task.done ? 'rgba(34,197,94,0.08)' : C.cardAlt, border: `1px solid ${task.done ? 'rgba(34,197,94,0.2)' : C.border}`, borderRadius: 18, padding: '14px 15px', minHeight: 56 }}>
     <input type="checkbox" checked={task.done} onChange={onToggle} style={{ width: 18, height: 18, accentColor: C.green, cursor: 'pointer', flexShrink: 0 }} />
-    {editing ? <input ref={ref} value={task.text} onChange={e => onTextChange(e.target.value)} onBlur={() => setEditing(false)} onKeyDown={e => e.key === 'Enter' && setEditing(false)} style={{ flex: 1, fontSize: 14, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'inherit', color: C.textPri }} /> : <span onClick={() => !task.done && setEditing(true)} style={{ flex: 1, fontSize: 14, color: task.done ? C.textMut : C.textPri, textDecoration: task.done ? 'line-through' : 'none', cursor: task.done ? 'default' : 'text' }}>{task.text || <span style={{ color: C.textMut }}>Task {index + 1}</span>}</span>}
+    {editing ? <input ref={ref} value={task.text} onChange={e => onTextChange(e.target.value)} onBlur={() => setEditing(false)} onKeyDown={e => e.key === 'Enter' && setEditing(false)} style={{ flex: 1, fontSize: 15, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'inherit', color: C.textPri }} /> : <span onClick={() => !task.done && setEditing(true)} style={{ flex: 1, fontSize: 15, lineHeight: 1.35, color: task.done ? C.textMut : C.textPri, textDecoration: task.done ? 'line-through' : 'none', cursor: task.done ? 'default' : 'text' }}>{task.text || <span style={{ color: C.textMut }}>Task {index + 1}</span>}</span>}
     {!task.done && <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
       <span style={{ fontSize: 11, color: C.orange, fontWeight: 700 }}>+3</span>
-      <button onClick={e => { e.stopPropagation(); onFocus() }} style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 8, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: C.blue, cursor: 'pointer' }}>⚡ Focus</button>
+      <button onClick={e => { e.stopPropagation(); onFocus() }} style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 10, padding: '6px 9px', fontSize: 11, fontWeight: 800, color: C.blue, cursor: 'pointer' }}>⚡ Focus</button>
     </div>}
   </div>
 }
@@ -847,10 +847,10 @@ function FocusTimer({ selected, setSelected, timeLeft, running, completed, claim
   </div>
 }
 
-function Card({ children }) { return <div style={{ background: C.card, borderRadius: 20, padding: '16px 18px', border: `1px solid ${C.border}` }}>{children}</div> }
-function Label({ children }) { return <div style={{ fontWeight: 700, fontSize: 13, color: C.textSec, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>{children}</div> }
-function Badge({ children, color }) { return <div style={{ background: color + '22', color, borderRadius: 20, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{children}</div> }
+function Card({ children }) { return <div style={{ background: 'rgba(22,27,38,0.96)', borderRadius: 24, padding: '20px', border: `1px solid ${C.border}`, boxShadow: '0 14px 34px rgba(0,0,0,0.16)' }}>{children}</div> }
+function Label({ children }) { return <div style={{ fontWeight: 800, fontSize: 12, color: C.textSec, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 12 }}>{children}</div> }
+function Badge({ children, color }) { return <div style={{ background: color + '22', color, borderRadius: 20, padding: '4px 11px', fontSize: 11, fontWeight: 800 }}>{children}</div> }
 function Empty({ children }) { return <p style={{ color: C.textMut, fontSize: 14, margin: 0 }}>{children}</p> }
 
-const PrimaryBtn = { background: C.blue, color: '#fff', border: 'none', borderRadius: 16, padding: '14px 20px', fontWeight: 700, fontSize: 15, cursor: 'pointer', width: '100%' }
-const GhostBtn = { background: 'transparent', border: `1.5px solid ${C.border}`, borderRadius: 16, padding: '13px 20px', color: C.textSec, fontWeight: 600, fontSize: 14, cursor: 'pointer', width: '100%' }
+const PrimaryBtn = { background: C.blue, color: '#fff', border: 'none', borderRadius: 18, padding: '15px 20px', minHeight: 50, fontWeight: 800, fontSize: 15, cursor: 'pointer', width: '100%', boxShadow: '0 12px 24px rgba(59,130,246,0.18)' }
+const GhostBtn = { background: 'transparent', border: `1.5px solid ${C.border}`, borderRadius: 18, padding: '14px 20px', minHeight: 48, color: C.textSec, fontWeight: 700, fontSize: 14, cursor: 'pointer', width: '100%' }
