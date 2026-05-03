@@ -268,7 +268,13 @@ export default function App() {
     reader.readAsText(file)
   }
 
-  const tabs = ['today', 'focus', 'goals', 'habits', 'rewards']
+  const tabs = [
+    { id: 'today', label: 'Today', icon: '🏠' },
+    { id: 'focus', label: 'Focus', icon: '⏱' },
+    { id: 'goals', label: 'Goals', icon: '🎯' },
+    { id: 'habits', label: 'Habits', icon: '🔁' },
+    { id: 'rewards', label: 'Rewards', icon: '🎁' },
+  ]
   const doneTasks = tasks.filter(t => t.done).length
   const nextReward = rewards.length > 0
     ? (rewards.filter(r => r.cost > points).sort((a, b) => a.cost - b.cost)[0] || rewards.slice().sort((a, b) => a.cost - b.cost)[0])
@@ -278,7 +284,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: C.bg }}>
-      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: '18px 20px 0', position: 'sticky', top: 0, zIndex: 10 }}>
+      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: '18px 20px', position: 'sticky', top: 0, zIndex: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.textPri, letterSpacing: 0.3 }}><span style={{ color: C.blue }}>Focus</span>Forge</h1>
           {(timerRunning || (timerCompleted && !timerClaimed)) && (
@@ -288,14 +294,9 @@ export default function App() {
           )}
           <div style={{ background: C.orange, borderRadius: 24, padding: '5px 14px', fontWeight: 800, fontSize: 13, color: '#fff', letterSpacing: 0.3 }}>{points} pts</div>
         </div>
-        <div style={{ display: 'flex', gap: 2, marginTop: 14, overflowX: 'auto', scrollbarWidth: 'none' }}>
-          {tabs.map(t => (
-            <button key={t} onClick={() => setTab(t)} style={{ background: 'transparent', color: tab === t ? C.blue : C.textSec, border: 'none', borderBottom: tab === t ? `2px solid ${C.blue}` : '2px solid transparent', padding: '8px 14px 10px', fontWeight: tab === t ? 700 : 500, fontSize: 13, cursor: 'pointer', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{t}</button>
-          ))}
-        </div>
       </div>
 
-      <div style={{ padding: '16px 14px' }}>
+      <div style={{ padding: '16px 14px 104px' }}>
         {tab === 'today' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ padding: '10px 4px 2px' }}>
@@ -433,9 +434,22 @@ export default function App() {
           />
         )}
       </div>
-      <div style={{ padding: '20px 16px 32px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 8 }}>
+      <div style={{ padding: '20px 16px 112px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 8 }}>
         <p style={{ fontSize: 11, color: C.textMut, margin: 0, lineHeight: 1.6 }}>FocusForge is a productivity support tool, not medical treatment or clinical advice.</p>
       </div>
+      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'rgba(13,15,20,0.96)', borderTop: `1px solid ${C.border}`, boxShadow: '0 -12px 30px rgba(0,0,0,0.35)', padding: '8px 10px calc(8px + env(safe-area-inset-bottom))' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4 }}>
+          {tabs.map(t => {
+            const active = tab === t.id
+            return (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ background: active ? C.blueLight : 'transparent', color: active ? C.blue : C.textSec, border: active ? `1px solid rgba(96,165,250,0.35)` : '1px solid transparent', borderRadius: 16, padding: '8px 4px 7px', minHeight: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, fontWeight: active ? 800 : 600, fontSize: 11, cursor: 'pointer' }}>
+                <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
+                <span>{t.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      </nav>
     </div>
   )
 }
