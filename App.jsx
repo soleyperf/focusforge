@@ -297,89 +297,118 @@ export default function App() {
 
       <div style={{ padding: '16px 14px' }}>
         {tab === 'today' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ background: `linear-gradient(135deg, #1a2540 0%, #0f1a30 100%)`, border: `1px solid ${C.blueLight}`, borderRadius: 20, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ color: C.textSec, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.2 }}>Today's Points</div>
-                <div style={{ color: C.textPri, fontSize: 42, fontWeight: 800, lineHeight: 1.1, marginTop: 2 }}>{points}</div>
-                <div style={{ color: C.textMut, fontSize: 12, marginTop: 4 }}>{doneTasks}/{tasks.length} tasks done</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ padding: '10px 4px 2px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: C.orange, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 8 }}>FocusForge</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: C.textPri, lineHeight: 1.15, letterSpacing: -0.4 }}>Good morning.</div>
+                  <div style={{ fontSize: 14, color: C.textSec, lineHeight: 1.5, marginTop: 5 }}>You don't need to do everything. Just what matters today.</div>
+                </div>
+                <div style={{ background: C.orangeLight, border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 18, padding: '9px 13px', color: C.orange, fontWeight: 800, fontSize: 15, whiteSpace: 'nowrap' }}>{points} pts</div>
               </div>
-              <div style={{ width: 56, height: 56, borderRadius: 16, background: C.blueLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎯</div>
             </div>
 
-            {nextBestTask ? (
-              <div style={{ background: 'linear-gradient(135deg,#1a2a1a 0%,#0d1a0d 100%)', border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 20, padding: '16px 18px' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.green, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>⚡ Next Best Action</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: C.textPri, marginBottom: 12 }}>{nextBestTask.text}</div>
-                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ ...PrimaryBtn, background: C.green, padding: '11px 16px', fontSize: 14 }}>▶ Start Now</button>
+            <Card>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14 }}>
+                <div style={{ flex: 1 }}>
+                  <Label>Main Goal</Label>
+                  <EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline />
+                </div>
+                <div style={{ width: 54, height: 54, borderRadius: 18, background: C.greenLight, color: C.green, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 800, flexShrink: 0 }}>GO</div>
               </div>
-            ) : (
+            </Card>
+
+            {nextBestTask && (
+              <div style={{ background: 'linear-gradient(135deg,#182818 0%,#101c12 100%)', border: `1px solid rgba(34,197,94,0.22)`, borderRadius: 20, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: C.green, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Next Best Action</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.textPri, lineHeight: 1.35 }}>{nextBestTask.text}</div>
+                </div>
+                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: C.green, color: '#07120a', border: 'none', borderRadius: 14, padding: '10px 13px', fontWeight: 800, fontSize: 13, cursor: 'pointer', flexShrink: 0 }}>Start</button>
+              </div>
+            )}
+
+            {!nextBestTask && (
               <div style={{ background: 'linear-gradient(135deg,#1a2030 0%,#0f1520 100%)', border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 20, padding: '16px 18px' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.orange, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>🎉 All tasks done!</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: C.orange, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>All tasks done</div>
                 <div style={{ fontSize: 14, color: C.textSec, marginBottom: 12 }}>Great work. Start a focus session or set a new tiny start.</div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, flex: 1, padding: '11px' }}>▶ Focus</button>
-                  <button onClick={() => setTinyDone(false)} style={{ ...GhostBtn, flex: 1, padding: '11px' }}>✏️ New Start</button>
+                  <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, flex: 1, padding: '11px' }}>Focus</button>
+                  <button onClick={() => setTinyDone(false)} style={{ ...GhostBtn, flex: 1, padding: '11px' }}>New Start</button>
                 </div>
               </div>
             )}
 
-            <div style={{ background: C.cardAlt, borderRadius: 14, padding: '12px 16px', border: `1px solid ${C.border}`, fontSize: 13, color: C.textSec, lineHeight: 1.6, textAlign: 'center', fontStyle: 'italic' }}>
-              Pick one goal. Start tiny. Focus once. Earn a reward. Restart anytime.
-            </div>
-
-            <Card><Label>🏆 Main Goal</Label><EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline /></Card>
-
             <Card>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label>⚡ Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts ✓</Badge>}</div>
-              <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving…" disabled={tinyDone} multiline />
-              {!tinyDone && <button onClick={completeTiny} style={{ ...PrimaryBtn, marginTop: 12 }}>✓ I Started!</button>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label>Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
+              <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." disabled={tinyDone} multiline />
+              {!tinyDone && <button onClick={completeTiny} style={{ ...PrimaryBtn, marginTop: 12, background: C.orange }}>Start Now</button>}
             </Card>
 
             <Card>
-              <Label>📋 Top 3 Tasks</Label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <Label>Top 3 Tasks</Label>
+                <span style={{ color: C.textMut, fontSize: 12, fontWeight: 700 }}>{doneTasks}/{tasks.length}</span>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-                {tasks.map((task, i) => <TaskRow key={task.id} task={task} index={i} onToggle={() => toggleTask(task.id)} onTextChange={text => updateTaskText(task.id, text)} onFocus={() => { setFocusTask({ id: task.id, text: task.text }); setTab('focus') }} />)}
+                {tasks.slice(0, 3).map((task, i) => <TaskRow key={task.id} task={task} index={i} onToggle={() => toggleTask(task.id)} onTextChange={text => updateTaskText(task.id, text)} onFocus={() => { setFocusTask({ id: task.id, text: task.text }); setTab('focus') }} />)}
               </div>
             </Card>
 
-            {nextReward ? (
-              <Card>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}><Label>🎁 Next Reward</Label>{canClaim && <Badge color={C.orange}>Ready!</Badge>}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 14, fontSize: 22, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{nextReward.emoji}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{nextReward.name}</div>
-                    <div style={{ fontSize: 12, color: C.textSec, marginBottom: 7 }}>{canClaim ? 'You can claim this now!' : `${nextReward.cost - points} pts to go`}</div>
-                    <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 6, height: 6, overflow: 'hidden' }}><div style={{ height: '100%', width: `${pctToReward}%`, background: canClaim ? C.green : C.orange, borderRadius: 6, transition: 'width 0.4s' }} /></div>
+            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '16px 18px', fontSize: 16, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ textAlign: 'left' }}><span style={{ display: 'block', fontSize: 17 }}>Start Focus Sprint</span><span style={{ display: 'block', fontSize: 12, opacity: 0.78, fontWeight: 500, marginTop: 2 }}>{timerSelected.label} - distraction-free</span></span>
+              <span style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(13,15,20,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800 }}>GO</span>
+            </button>
+
+            {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 16, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>Your Tiny Start has been updated. Keep going.</div></div>}
+
+            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '15px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left' }}><span><span style={{ display: 'block', color: C.textPri, fontSize: 15 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 12, marginTop: 2, fontWeight: 500 }}>Clear the slate. Reset your focus.</span></span><span style={{ color: C.textMut }}>More</span></button>}
+
+            <details style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, overflow: 'hidden' }}>
+              <summary style={{ listStyle: 'none', padding: '15px 18px', color: C.textSec, fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.8, cursor: 'pointer' }}>More options</summary>
+              <div style={{ borderTop: `1px solid ${C.border}`, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ background: C.cardAlt, borderRadius: 16, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ color: C.textSec, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Today's Points</div>
+                    <div style={{ color: C.textMut, fontSize: 12, marginTop: 3 }}>{doneTasks}/{tasks.length} tasks done</div>
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: 16, color: canClaim ? C.green : C.orange, minWidth: 44, textAlign: 'right' }}>{points}/{nextReward.cost}</div>
+                  <div style={{ color: C.textPri, fontSize: 30, fontWeight: 800 }}>{points}</div>
                 </div>
-              </Card>
-            ) : (
-              <div style={{ background: C.card, borderRadius: 20, padding: '14px 18px', border: `1px solid ${C.border}`, fontSize: 13, color: C.textMut, textAlign: 'center' }}>
-                No rewards set. <button onClick={() => setTab('rewards')} style={{ background: 'none', border: 'none', color: C.blue, cursor: 'pointer', fontWeight: 700, fontSize: 13, padding: 0 }}>Add one →</button>
+
+                {nextReward ? (
+                  <div style={{ background: C.cardAlt, borderRadius: 16, padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}><Label>Next Reward</Label>{canClaim && <Badge color={C.orange}>Ready!</Badge>}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{ width: 46, height: 46, borderRadius: 14, fontSize: 12, fontWeight: 800, color: C.orange, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>WIN</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{nextReward.name}</div>
+                        <div style={{ fontSize: 12, color: C.textSec, marginBottom: 7 }}>{canClaim ? 'You can claim this now!' : `${nextReward.cost - points} pts to go`}</div>
+                        <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 6, height: 6, overflow: 'hidden' }}><div style={{ height: '100%', width: `${pctToReward}%`, background: canClaim ? C.green : C.orange, borderRadius: 6, transition: 'width 0.4s' }} /></div>
+                      </div>
+                      <div style={{ fontWeight: 800, fontSize: 16, color: canClaim ? C.green : C.orange, minWidth: 44, textAlign: 'right' }}>{points}/{nextReward.cost}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ background: C.cardAlt, borderRadius: 16, padding: '14px 16px', fontSize: 13, color: C.textMut, textAlign: 'center' }}>
+                    No rewards set. <button onClick={() => setTab('rewards')} style={{ background: 'none', border: 'none', color: C.blue, cursor: 'pointer', fontWeight: 700, fontSize: 13, padding: 0 }}>Add one</button>
+                  </div>
+                )}
+
+                <button onClick={startNewDay} style={{ ...GhostBtn, padding: '13px' }}>Start New Day</button>
+
+                <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Settings</div>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                    <button onClick={exportData} style={{ ...GhostBtn, flex: 1, padding: '11px', fontSize: 13 }}>Export Data</button>
+                    <button onClick={() => importRef.current?.click()} style={{ ...GhostBtn, flex: 1, padding: '11px', fontSize: 13 }}>Import Data</button>
+                  </div>
+                  <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={e => { importData(e.target.files?.[0]); e.target.value = '' }} />
+                  <div style={{ fontSize: 11, fontWeight: 700, color: C.red, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Danger Zone</div>
+                  <button onClick={resetAllData} style={{ ...GhostBtn, padding: '11px', color: C.red, borderColor: 'rgba(239,68,68,0.3)', width: '100%' }}>Reset all data</button>
+                </div>
               </div>
-            )}
-
-            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '15px', fontSize: 16 }}>▶ Start Focus Session</button>
-
-            <button onClick={startNewDay} style={{ ...GhostBtn, padding: '14px' }}>🌅 Start New Day</button>
-
-            {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 16, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}><span style={{ fontSize: 20 }}>💚</span><div><div style={{ fontWeight: 700, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>Your Tiny Start has been updated. Keep going.</div></div></div>}
-
-            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '14px' }}>🔄 Restart My Day</button>}
-
-            <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16, marginTop: 4 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>⚙️ Settings</div>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                <button onClick={exportData} style={{ ...GhostBtn, flex: 1, padding: '11px', fontSize: 13 }}>⬇ Export Data</button>
-                <button onClick={() => importRef.current?.click()} style={{ ...GhostBtn, flex: 1, padding: '11px', fontSize: 13 }}>⬆ Import Data</button>
-              </div>
-              <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={e => { importData(e.target.files?.[0]); e.target.value = '' }} />
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.red, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>⚠️ Danger Zone</div>
-              <button onClick={resetAllData} style={{ ...GhostBtn, padding: '11px', color: C.red, borderColor: 'rgba(239,68,68,0.3)', width: '100%' }}>Reset all data</button>
-            </div>
+            </details>
           </div>
         )}
 
