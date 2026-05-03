@@ -315,7 +315,6 @@ export default function App() {
                   <Label>Main Goal</Label>
                   <EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline />
                 </div>
-                <div style={{ width: 54, height: 54, borderRadius: 18, background: C.greenLight, color: C.green, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 800, flexShrink: 0 }}>🎯</div>
               </div>
             </Card>
 
