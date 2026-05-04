@@ -315,7 +315,7 @@ export default function App() {
             {nextBestTask && (
               <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,191,36,0.06) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.28)`, borderRadius: 28, padding: '20px', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 16, boxShadow: '0 18px 40px rgba(0,0,0,0.24)' }}>
                 <div>
-                  <Label tone="orange">⚡ Tiny Start</Label>
+                  <Label tone="orange">Next Best Action</Label>
                   <div style={{ fontSize: 20, fontWeight: 750, color: C.textPri, lineHeight: 1.35 }}>{nextBestTask.text}</div>
                 </div>
                 <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '13px 18px', minHeight: 48, fontWeight: 850, fontSize: 14, cursor: 'pointer', flexShrink: 0, boxShadow: '0 12px 24px rgba(249,115,22,0.22)' }}>Start Now</button>
