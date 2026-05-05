@@ -295,10 +295,10 @@ export default function App() {
             {nextBestTask && (
               <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.16) 0%, rgba(251,191,36,0.07) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.30)`, borderRadius: 28, padding: '22px', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 16, boxShadow: '0 20px 44px rgba(249,115,22,0.18)' }}>
                 <div>
-                  <Label tone="orange">Next Best Action</Label>
+                  <Label tone="orange">Start Here</Label>
                   <div style={{ fontSize: 22, fontWeight: 850, color: C.textPri, lineHeight: 1.28, letterSpacing: -0.2 }}>{nextBestTask.text}</div>
                 </div>
-                <button onClick={() => { setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '13px 18px', minHeight: 48, fontWeight: 850, fontSize: 14, cursor: 'pointer', flexShrink: 0, boxShadow: '0 12px 24px rgba(249,115,22,0.22)' }}>Start Now</button>
+                <button onClick={() => { if (!timerRunning && !timerCompleted && timerLeft == null) setTimerSelected(DURATIONS[1]); setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '13px 18px', minHeight: 48, fontWeight: 850, fontSize: 14, cursor: 'pointer', flexShrink: 0, boxShadow: '0 12px 24px rgba(249,115,22,0.22)' }}>Start 10-Min Focus</button>
               </div>
             )}
 
@@ -315,20 +315,20 @@ export default function App() {
 
             <div style={{ background: 'rgba(255,255,255,0.035)', border: `1px solid ${C.border}`, borderRadius: 22, padding: '16px', boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label tone="orange">⚡ Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
-              <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." disabled={tinyDone} multiline size="large" />
+              {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Tiny Win logged</div> : <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." multiline size="large" />}
               {!tinyDone && <button onClick={completeTiny} style={{ ...GhostBtn, width: 'auto', minWidth: 126, marginTop: 12, padding: '11px 14px', borderRadius: 999 }}>Mark Tiny Win</button>}
             </div>
-
-            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '22px 24px', fontSize: 16, borderRadius: 26, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 20px 42px rgba(249,115,22,0.30)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left' }}><span style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>◎</span><span><span style={{ display: 'block', fontSize: 20, fontWeight: 850 }}>Start Focus Sprint</span><span style={{ display: 'block', fontSize: 14, opacity: 0.86, fontWeight: 600, marginTop: 4 }}>{timerSelected.label} · Distraction-free</span></span></span>
-              <span style={{ width: 58, height: 58, borderRadius: '50%', background: 'rgba(13,15,20,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fbbf24', flexShrink: 0 }}>▶</span>
-            </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '10px 0 2px' }}>
               <div style={{ height: 1, background: C.border, flex: 1 }} />
               <div style={{ color: C.textMut, fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.1, whiteSpace: 'nowrap' }}>Progress & Options</div>
               <div style={{ height: 1, background: C.border, flex: 1 }} />
             </div>
+
+            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '22px 24px', fontSize: 16, borderRadius: 26, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 20px 42px rgba(249,115,22,0.30)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left' }}><span style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>◎</span><span><span style={{ display: 'block', fontSize: 20, fontWeight: 850 }}>Start Blank Focus Sprint</span><span style={{ display: 'block', fontSize: 14, opacity: 0.86, fontWeight: 600, marginTop: 4 }}>{timerSelected.label} · Distraction-free</span></span></span>
+              <span style={{ width: 58, height: 58, borderRadius: '50%', background: 'rgba(13,15,20,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fbbf24', flexShrink: 0 }}>▶</span>
+            </button>
 
             <Card>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
