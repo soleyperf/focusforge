@@ -62,6 +62,18 @@ const SKIP_MESSAGES = [
   "Every day is a new chance.",
 ]
 
+function hasCustomTasks(savedTasks) {
+  if (!Array.isArray(savedTasks) || savedTasks.length === 0) return false
+  if (savedTasks.length !== defaultTasks.length) return true
+  return savedTasks.some((task, i) => (task.text || '').trim() !== defaultTasks[i].text)
+}
+
+function initialSetupComplete() {
+  const stored = load('ff_setupComplete', null)
+  if (stored !== null) return !!stored
+  return hasCustomTasks(load('ff_tasks', null))
+}
+
 export default function App() {
   const [points, setPoints] = useState(() => load('ff_points', 0))
   const [tab, setTab] = useState('today')
@@ -74,6 +86,8 @@ export default function App() {
   const [goals, setGoals] = useState(() => load('ff_goals', []))
   const [restartOpen, setRestartOpen] = useState(false)
   const [restarted, setRestarted] = useState(false)
+  const [setupComplete, setSetupComplete] = useState(initialSetupComplete)
+  const [setupOpen, setSetupOpen] = useState(false)
   const [focusTask, setFocusTask] = useState(() => load('ff_focusTask', null))
   const [timerSelected, setTimerSelected] = useState(() => {
     const s = load('ff_timer', null)
@@ -122,6 +136,7 @@ export default function App() {
   useEffect(() => save('ff_goals', goals), [goals])
   useEffect(() => save('ff_feedbackOn', feedbackOn), [feedbackOn])
   useEffect(() => save('ff_focusTask', focusTask), [focusTask])
+  useEffect(() => save('ff_setupComplete', setupComplete), [setupComplete])
   useEffect(() => {
     save('ff_timer', {
       selectedLabel: timerSelected.label,
@@ -168,11 +183,12 @@ export default function App() {
 
   function resetAllData() {
     if (!window.confirm('Reset all data? This cannot be undone.')) return
-    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask'].forEach(k => localStorage.removeItem(k))
+    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask','ff_setupComplete'].forEach(k => localStorage.removeItem(k))
     setPoints(0); setTasks(defaultTasks); setTinyDone(false)
     setMainGoal(DEFAULT_GOAL); setTinyText(DEFAULT_TINY)
     setHabits([]); setRewards(DEFAULT_REWARDS); setGoals([])
     setRestartOpen(false); setRestarted(false); setFocusTask(null)
+    setSetupComplete(false); setSetupOpen(false); setTab('today')
     clearInterval(timerRef.current)
     setTimerSelected(DURATIONS[2]); setTimerEndAt(null); setTimerLeft(null)
     setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerPartial(false)
@@ -200,6 +216,23 @@ export default function App() {
 
   function completeTiny() {
     if (!tinyDone) { setTinyDone(true); setPoints(p => p + 2) }
+  }
+  function buildFocusPlan(taskTexts, priorityText) {
+    const clean = taskTexts.map(t => t.trim()).filter(Boolean)
+    if (clean.length < 3) return
+    const priority = priorityText || clean[0]
+    const ordered = [priority, ...clean.filter((text, i) => text !== priority || i !== clean.indexOf(priority))]
+    const nextTasks = ordered.map((text, i) => ({ id: Date.now() + i, text, done: false }))
+    setTasks(nextTasks)
+    setMainGoal(priority)
+    setTinyText(`Work on: ${priority} for 5 minutes.`)
+    setTinyDone(false)
+    setFocusTask({ id: nextTasks[0].id, text: priority })
+    setSetupComplete(true)
+    setSetupOpen(false)
+    setRestartOpen(false)
+    setRestarted(false)
+    setTab('today')
   }
   const timerStart = () => {
     const endAt = Date.now() + timerSelected.seconds * 1000
@@ -247,7 +280,7 @@ export default function App() {
   const nextBestTask  = tasks.find(t => !t.done) || null
 
   function exportData() {
-    const keys = ['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask']
+    const keys = ['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask','ff_setupComplete']
     const data = {}
     keys.forEach(k => { try { const v = localStorage.getItem(k); if (v !== null) data[k] = JSON.parse(v) } catch {} })
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -274,6 +307,7 @@ export default function App() {
     : null
   const pctToReward = nextReward ? Math.min(100, (points / nextReward.cost) * 100) : 0
   const canClaim = nextReward ? points >= nextReward.cost : false
+  const showSetup = tab === 'today' && (!setupComplete || setupOpen)
 
   return (
     <div style={{ fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif', maxWidth: 480, margin: '0 auto', minHeight: '100vh', minHeight: '100dvh', background: `radial-gradient(circle at 50% -10%, ${C.blueLight} 0%, transparent 34%), ${C.bg}` }}>
@@ -290,7 +324,9 @@ export default function App() {
       </div>
 
       <div style={{ padding: '20px 16px 112px' }}>
-        {tab === 'today' && (
+        {showSetup && <SetupScreen tasks={tasks} onBuild={buildFocusPlan} />}
+
+        {tab === 'today' && !showSetup && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {nextBestTask && (
               <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.16) 0%, rgba(251,191,36,0.07) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.30)`, borderRadius: 28, padding: '22px', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 16, boxShadow: '0 20px 44px rgba(249,115,22,0.18)' }}>
@@ -386,6 +422,7 @@ export default function App() {
                   <div style={{ color: C.textPri, fontSize: 30, fontWeight: 800 }}>{points}</div>
                 </div>
                 <button onClick={startNewDay} style={{ ...GhostBtn, padding: '13px' }}>Start New Day</button>
+                <button onClick={() => { setSetupOpen(true); setTab('today') }} style={{ ...GhostBtn, padding: '13px' }}>Rebuild Task List</button>
                 <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Settings</div>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -791,6 +828,43 @@ function playCompletionSound() {
       osc.stop(t + 0.55)
     })
   } catch {}
+}
+
+function SetupScreen({ tasks, onBuild }) {
+  const initialTexts = Array.isArray(tasks) && hasCustomTasks(tasks) ? tasks.map(t => t.text || '').slice(0, 5) : ['', '', '']
+  const [inputs, setInputs] = useState(() => initialTexts.length >= 3 ? initialTexts : ['', '', ''])
+  const [priority, setPriority] = useState('')
+  const validTasks = inputs.map(t => t.trim()).filter(Boolean)
+  const canBuild = validTasks.length >= 3
+  const selectedPriority = priority && validTasks.includes(priority) ? priority : validTasks[0] || ''
+  useEffect(() => {
+    if (canBuild && !validTasks.includes(priority)) setPriority(validTasks[0])
+  }, [canBuild, priority, validTasks.join('|')])
+  const updateInput = (index, value) => setInputs(prev => prev.map((item, i) => i === index ? value : item))
+  const submit = () => { if (canBuild) onBuild(inputs, selectedPriority) }
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ padding: '4px 2px 0' }}>
+      <div style={{ fontSize: 13, color: C.textSec, lineHeight: 1.5 }}>Get it out of your head. We'll turn it into a plan.</div>
+    </div>
+    <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.055), rgba(22,27,38,0.96))', border: `1px solid ${C.border}`, borderRadius: 28, padding: 20, boxShadow: '0 18px 40px rgba(0,0,0,0.20)' }}>
+      <div style={{ fontSize: 25, fontWeight: 900, color: C.textPri, letterSpacing: -0.4, marginBottom: 6 }}>Brain dump your tasks</div>
+      <div style={{ fontSize: 14, color: C.textSec, lineHeight: 1.5, marginBottom: 18 }}>Add at least 3 things. They do not need to be perfect.</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {inputs.map((value, i) => <input key={i} value={value} onChange={e => updateInput(i, e.target.value)} placeholder={`Task ${i + 1}`} style={{ width: '100%', minHeight: 54, borderRadius: 16, border: `1.5px solid ${C.border}`, background: C.cardAlt, color: C.textPri, padding: '14px 15px', fontSize: 16, outline: 'none', fontFamily: 'inherit' }} />)}
+      </div>
+      <button onClick={() => setInputs(prev => [...prev, ''])} style={{ ...GhostBtn, marginTop: 12, padding: '12px 14px', minHeight: 46 }}>+ Add another task</button>
+      {canBuild && <div style={{ marginTop: 20 }}>
+        <Label tone="green">Pick the one that matters most today</Label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+          {validTasks.map((task, i) => {
+            const active = selectedPriority === task
+            return <button key={`${task}-${i}`} onClick={() => setPriority(task)} style={{ background: active ? C.orangeLight : 'rgba(255,255,255,0.025)', border: `1.5px solid ${active ? C.orange : C.border}`, borderRadius: 16, padding: '13px 14px', color: active ? C.textPri : C.textSec, fontWeight: active ? 850 : 650, fontSize: 14, textAlign: 'left', cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}><span style={{ width: 22, height: 22, borderRadius: '50%', border: `1.5px solid ${active ? C.orange : C.border}`, background: active ? C.orange : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1208', fontSize: 12, fontWeight: 900 }}>{active ? '✓' : ''}</span><span>{task}</span></button>
+          })}
+        </div>
+      </div>}
+      <button onClick={submit} disabled={!canBuild} style={{ ...PrimaryBtn, marginTop: 20, background: canBuild ? `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)` : C.cardAlt, color: canBuild ? '#fff' : C.textMut, cursor: canBuild ? 'pointer' : 'not-allowed', boxShadow: canBuild ? '0 18px 34px rgba(249,115,22,0.24)' : 'none' }}>{canBuild ? 'Build My Focus Plan' : 'Add at least 3 tasks'}</button>
+    </div>
+  </div>
 }
 
 function FocusTimer({ selected, setSelected, timeLeft, running, completed, claimed, partial, feedbackOn, setFeedbackOn, onStart, onPause, onResume, onReset, onClaim, onEndEarly, focusTask, onClearFocusTask, onRestartDay }) {
