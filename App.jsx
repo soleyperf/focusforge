@@ -40,7 +40,10 @@ const defaultTasks   = [
 const DURATIONS = [
   { label: '5 min',  seconds: 5  * 60, pts: 3 },
   { label: '10 min', seconds: 10 * 60, pts: 3 },
+  { label: '15 min', seconds: 15 * 60, pts: 4 },
+  { label: '20 min', seconds: 20 * 60, pts: 4 },
   { label: '25 min', seconds: 25 * 60, pts: 5 },
+  { label: '30 min', seconds: 30 * 60, pts: 6 },
 ]
 const RESTART_OPTIONS = [
   { id: 'five', emoji: '⚡', label: 'Give me a 5-minute task', tiny: "Pick one small thing and work on it for just 5 minutes. That's all." },
@@ -91,7 +94,7 @@ export default function App() {
   const [focusTask, setFocusTask] = useState(() => load('ff_focusTask', null))
   const [timerSelected, setTimerSelected] = useState(() => {
     const s = load('ff_timer', null)
-    return (s && DURATIONS.find(d => d.label === s.selectedLabel)) || DURATIONS[2]
+    return (s && DURATIONS.find(d => d.label === s.selectedLabel)) || DURATIONS.find(d => d.label === '25 min')
   })
   const [timerEndAt, setTimerEndAt] = useState(() => {
     const s = load('ff_timer', null)
@@ -190,7 +193,7 @@ export default function App() {
     setRestartOpen(false); setRestarted(false); setFocusTask(null)
     setSetupComplete(false); setSetupOpen(false); setTab('today')
     clearInterval(timerRef.current)
-    setTimerSelected(DURATIONS[2]); setTimerEndAt(null); setTimerLeft(null)
+    setTimerSelected(DURATIONS.find(d => d.label === '25 min')); setTimerEndAt(null); setTimerLeft(null)
     setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerPartial(false)
   }
 
@@ -217,15 +220,42 @@ export default function App() {
   function completeTiny() {
     if (!tinyDone) { setTinyDone(true); setPoints(p => p + 2) }
   }
-  function buildFocusPlan(taskTexts, priorityText) {
+  function selectDuration(label) {
+    if (!timerRunning && !timerCompleted && timerLeft == null) {
+      const duration = DURATIONS.find(d => d.label === label)
+      if (duration) setTimerSelected(duration)
+    }
+  }
+  function startFocus(task, durationLabel) {
+    selectDuration(durationLabel)
+    setFocusTask(task ? { id: task.id ?? Date.now(), text: task.text } : null)
+    setTab('focus')
+  }
+  function rebuildToday() {
+    setTasks(defaultTasks)
+    setMainGoal(DEFAULT_GOAL)
+    setTinyText(DEFAULT_TINY)
+    setTinyDone(false)
+    setFocusTask(null)
+    setSetupComplete(false)
+    setSetupOpen(true)
+    setRestartOpen(false)
+    setRestarted(false)
+    clearInterval(timerRef.current)
+    setTimerSelected(DURATIONS.find(d => d.label === '25 min')); setTimerEndAt(null); setTimerLeft(null)
+    setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerPartial(false)
+    setTab('today')
+  }
+  function buildFocusPlan(taskTexts, mainText, tinyTaskText) {
     const clean = taskTexts.map(t => t.trim()).filter(Boolean)
     if (clean.length < 3) return
-    const priority = priorityText || clean[0]
-    const ordered = [priority, ...clean.filter((text, i) => text !== priority || i !== clean.indexOf(priority))]
+    const priority = mainText || clean[0]
+    const tinyTask = tinyTaskText && tinyTaskText !== priority ? tinyTaskText : (clean.find(t => t !== priority) || clean[1] || priority)
+    const ordered = [priority, tinyTask, ...clean.filter((text, i) => i !== clean.indexOf(priority) && i !== clean.indexOf(tinyTask))]
     const nextTasks = ordered.map((text, i) => ({ id: Date.now() + i, text, done: false }))
     setTasks(nextTasks)
     setMainGoal(priority)
-    setTinyText(`Work on: ${priority} for 5 minutes.`)
+    setTinyText(tinyTask)
     setTinyDone(false)
     setFocusTask({ id: nextTasks[0].id, text: priority })
     setSetupComplete(true)
@@ -329,12 +359,14 @@ export default function App() {
         {tab === 'today' && !showSetup && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {nextBestTask && (
-              <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.16) 0%, rgba(251,191,36,0.07) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.30)`, borderRadius: 28, padding: '22px', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 16, boxShadow: '0 20px 44px rgba(249,115,22,0.18)' }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.16) 0%, rgba(251,191,36,0.07) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.30)`, borderRadius: 28, padding: '22px', display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 20px 44px rgba(249,115,22,0.18)' }}>
                 <div>
                   <Label tone="orange">Start Here</Label>
                   <div style={{ fontSize: 22, fontWeight: 850, color: C.textPri, lineHeight: 1.28, letterSpacing: -0.2 }}>{nextBestTask.text}</div>
                 </div>
-                <button onClick={() => { if (!timerRunning && !timerCompleted && timerLeft == null) setTimerSelected(DURATIONS[1]); setFocusTask({ id: nextBestTask.id, text: nextBestTask.text }); setTab('focus') }} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '13px 18px', minHeight: 48, fontWeight: 850, fontSize: 14, cursor: 'pointer', flexShrink: 0, boxShadow: '0 12px 24px rgba(249,115,22,0.22)' }}>Start 10-Min Focus</button>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {['10 min','15 min','20 min','25 min'].map(label => <button key={label} onClick={() => startFocus(nextBestTask, label)} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 6px', minHeight: 46, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>{label}</button>)}
+                </div>
               </div>
             )}
 
@@ -351,8 +383,8 @@ export default function App() {
 
             <div style={{ background: 'rgba(255,255,255,0.035)', border: `1px solid ${C.border}`, borderRadius: 22, padding: '16px', boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label tone="orange">⚡ Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
-              {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Tiny Win logged</div> : <EditableText value={tinyText} onChange={setTinyText} placeholder="One tiny action to get you moving..." multiline size="large" />}
-              {!tinyDone && <button onClick={completeTiny} style={{ ...GhostBtn, width: 'auto', minWidth: 126, marginTop: 12, padding: '11px 14px', borderRadius: 999 }}>Mark Tiny Win</button>}
+              {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Tiny Win logged</div> : <div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.35 }}>{tinyText}</div>}
+              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '10 min')} style={{ ...GhostBtn, width: 'auto', minWidth: 168, marginTop: 12, padding: '11px 14px', borderRadius: 999 }}>Start 10-Min Tiny Focus</button>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '10px 0 2px' }}>
@@ -361,8 +393,8 @@ export default function App() {
               <div style={{ height: 1, background: C.border, flex: 1 }} />
             </div>
 
-            <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, padding: '22px 24px', fontSize: 16, borderRadius: 26, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 20px 42px rgba(249,115,22,0.30)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left' }}><span style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>◎</span><span><span style={{ display: 'block', fontSize: 20, fontWeight: 850 }}>Start Blank Focus Sprint</span><span style={{ display: 'block', fontSize: 14, opacity: 0.86, fontWeight: 600, marginTop: 4 }}>{timerSelected.label} · Distraction-free</span></span></span>
+            <button onClick={() => startFocus(null, '30 min')} style={{ ...PrimaryBtn, padding: '22px 24px', fontSize: 16, borderRadius: 26, background: `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 20px 42px rgba(249,115,22,0.30)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left' }}><span style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(255,255,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>◎</span><span><span style={{ display: 'block', fontSize: 20, fontWeight: 850 }}>Start Blank 30-Min Sprint</span><span style={{ display: 'block', fontSize: 14, opacity: 0.86, fontWeight: 600, marginTop: 4 }}>30 min · Distraction-free</span></span></span>
               <span style={{ width: 58, height: 58, borderRadius: '50%', background: 'rgba(13,15,20,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fbbf24', flexShrink: 0 }}>▶</span>
             </button>
 
@@ -422,7 +454,7 @@ export default function App() {
                   <div style={{ color: C.textPri, fontSize: 30, fontWeight: 800 }}>{points}</div>
                 </div>
                 <button onClick={startNewDay} style={{ ...GhostBtn, padding: '13px' }}>Start New Day</button>
-                <button onClick={() => { setSetupOpen(true); setTab('today') }} style={{ ...GhostBtn, padding: '13px' }}>Rebuild Task List</button>
+                <button onClick={rebuildToday} style={{ ...GhostBtn, padding: '13px' }}>Rebuild Today</button>
                 <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Settings</div>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -833,15 +865,20 @@ function playCompletionSound() {
 function SetupScreen({ tasks, onBuild }) {
   const initialTexts = Array.isArray(tasks) && hasCustomTasks(tasks) ? tasks.map(t => t.text || '').slice(0, 5) : ['', '', '']
   const [inputs, setInputs] = useState(() => initialTexts.length >= 3 ? initialTexts : ['', '', ''])
-  const [priority, setPriority] = useState('')
+  const [mainTask, setMainTask] = useState('')
+  const [tinyTask, setTinyTask] = useState('')
   const validTasks = inputs.map(t => t.trim()).filter(Boolean)
   const canBuild = validTasks.length >= 3
-  const selectedPriority = priority && validTasks.includes(priority) ? priority : validTasks[0] || ''
+  const selectedMain = mainTask && validTasks.includes(mainTask) ? mainTask : validTasks[0] || ''
+  const tinyOptions = validTasks.filter(task => task !== selectedMain)
+  const selectedTiny = tinyTask && tinyOptions.includes(tinyTask) ? tinyTask : tinyOptions[0] || ''
   useEffect(() => {
-    if (canBuild && !validTasks.includes(priority)) setPriority(validTasks[0])
-  }, [canBuild, priority, validTasks.join('|')])
+    if (canBuild && !validTasks.includes(mainTask)) setMainTask(validTasks[0])
+    if (canBuild && !tinyOptions.includes(tinyTask)) setTinyTask(tinyOptions[0] || '')
+  }, [canBuild, mainTask, tinyTask, validTasks.join('|')])
   const updateInput = (index, value) => setInputs(prev => prev.map((item, i) => i === index ? value : item))
-  const submit = () => { if (canBuild) onBuild(inputs, selectedPriority) }
+  const submit = () => { if (canBuild) onBuild(inputs, selectedMain, selectedTiny) }
+  const choiceButton = (task, active, onClick) => <button key={task} onClick={onClick} style={{ background: active ? C.orangeLight : 'rgba(255,255,255,0.025)', border: `1.5px solid ${active ? C.orange : C.border}`, borderRadius: 16, padding: '13px 14px', color: active ? C.textPri : C.textSec, fontWeight: active ? 850 : 650, fontSize: 14, textAlign: 'left', cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}><span style={{ width: 22, height: 22, borderRadius: '50%', border: `1.5px solid ${active ? C.orange : C.border}`, background: active ? C.orange : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1208', fontSize: 12, fontWeight: 900 }}>{active ? '✓' : ''}</span><span>{task}</span></button>
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
     <div style={{ padding: '4px 2px 0' }}>
       <div style={{ fontSize: 13, color: C.textSec, lineHeight: 1.5 }}>Get it out of your head. We'll turn it into a plan.</div>
@@ -856,10 +893,12 @@ function SetupScreen({ tasks, onBuild }) {
       {canBuild && <div style={{ marginTop: 20 }}>
         <Label tone="green">Pick the one that matters most today</Label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-          {validTasks.map((task, i) => {
-            const active = selectedPriority === task
-            return <button key={`${task}-${i}`} onClick={() => setPriority(task)} style={{ background: active ? C.orangeLight : 'rgba(255,255,255,0.025)', border: `1.5px solid ${active ? C.orange : C.border}`, borderRadius: 16, padding: '13px 14px', color: active ? C.textPri : C.textSec, fontWeight: active ? 850 : 650, fontSize: 14, textAlign: 'left', cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}><span style={{ width: 22, height: 22, borderRadius: '50%', border: `1.5px solid ${active ? C.orange : C.border}`, background: active ? C.orange : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1208', fontSize: 12, fontWeight: 900 }}>{active ? '✓' : ''}</span><span>{task}</span></button>
-          })}
+          {validTasks.map(task => choiceButton(task, selectedMain === task, () => setMainTask(task)))}
+        </div>
+        <div style={{ height: 14 }} />
+        <Label tone="orange">Pick your Tiny Start</Label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+          {tinyOptions.map(task => choiceButton(task, selectedTiny === task, () => setTinyTask(task)))}
         </div>
       </div>}
       <button onClick={submit} disabled={!canBuild} style={{ ...PrimaryBtn, marginTop: 20, background: canBuild ? `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)` : C.cardAlt, color: canBuild ? '#fff' : C.textMut, cursor: canBuild ? 'pointer' : 'not-allowed', boxShadow: canBuild ? '0 18px 34px rgba(249,115,22,0.24)' : 'none' }}>{canBuild ? 'Build My Focus Plan' : 'Add at least 3 tasks'}</button>
@@ -917,3 +956,4 @@ function Empty({ children }) { return <p style={{ color: C.textMut, fontSize: 14
 
 const PrimaryBtn = { background: C.blue, color: '#fff', border: 'none', borderRadius: 18, padding: '15px 20px', minHeight: 50, fontWeight: 800, fontSize: 15, cursor: 'pointer', width: '100%', boxShadow: '0 12px 24px rgba(59,130,246,0.18)' }
 const GhostBtn = { background: 'transparent', border: `1.5px solid ${C.border}`, borderRadius: 18, padding: '14px 20px', minHeight: 48, color: C.textSec, fontWeight: 700, fontSize: 14, cursor: 'pointer', width: '100%' }
+
