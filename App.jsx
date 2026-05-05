@@ -344,7 +344,7 @@ export default function App() {
                   {nextBestTask.goalId && <div style={{ fontSize: 12, color: C.textMut, marginTop: 8, fontWeight: 700 }}>Supports: {goals.find(g => g.id === nextBestTask.goalId)?.name || 'Goal'}</div>}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                  {['10 min','15 min','20 min','25 min'].map(label => <button key={label} onClick={() => startFocus(nextBestTask, label)} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 6px', minHeight: 46, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>{label}</button>)}
+                  {['10 min','15 min','20 min','25 min'].map(label => <button key={label} onClick={() => startFocus(nextBestTask, label)} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 6px', minHeight: 46, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>{label}{label === '10 min' && <span style={{ display: 'block', fontSize: 10, fontWeight: 800, opacity: 0.72, marginTop: 2 }}>Best start</span>}</button>)}
                 </div>
               </div>
             )}
@@ -363,7 +363,7 @@ export default function App() {
             <div style={{ background: 'rgba(255,255,255,0.035)', border: `1px solid ${C.border}`, borderRadius: 22, padding: '16px', boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><div><Label tone="orange">Side Quest</Label><div style={{ color: C.textMut, fontSize: 12, fontWeight: 800, marginTop: -8 }}>Easy Win</div></div>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
               {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Side Quest logged</div> : <div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.35 }}>{tinyText}</div>}
-              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '10 min')} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 16px', minHeight: 46, marginTop: 12, minWidth: 188, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>Start Side Quest (10 min)</button>}
+              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '5 min')} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 16px', minHeight: 46, marginTop: 12, minWidth: 188, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>Start Side Quest (5 min)</button>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '10px 0 2px' }}>
