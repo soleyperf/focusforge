@@ -45,13 +45,10 @@ const DURATIONS = [
   { label: '25 min', seconds: 25 * 60, pts: 5 },
   { label: '30 min', seconds: 30 * 60, pts: 6 },
 ]
-const RESTART_OPTIONS = [
-  { id: 'five', emoji: '⚡', label: 'Give me a 5-minute task', tiny: "Pick one small thing and work on it for just 5 minutes. That's all." },
-  { id: 'shrink', emoji: '🎯', label: "Shrink today's goal", tiny: 'Forget the big plan. One small win is enough for today.' },
-  { id: 'focus10', emoji: '⏱', label: 'Start a 10-minute focus', tiny: "Set a timer for 10 minutes. Just start - don't think, just go." },
-  { id: 'tomorrow', emoji: '📅', label: 'Move tasks to tomorrow', tiny: "Today's slate is clear. Rest, recharge, come back stronger." },
-  { id: 'break', emoji: '🧘', label: 'Quick reset break', tiny: 'Step away for 5 minutes. Breathe, stretch, then return fresh.' },
-]
+function todayKey() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 const DEFAULT_REWARDS = [
   { id: 1, name: 'YouTube', emoji: '📺', cost: 3 },
   { id: 2, name: 'Music', emoji: '🎵', cost: 2 },
@@ -91,6 +88,8 @@ export default function App() {
   const [restarted, setRestarted] = useState(false)
   const [setupComplete, setSetupComplete] = useState(initialSetupComplete)
   const [setupOpen, setSetupOpen] = useState(false)
+  const [dayKey, setDayKey] = useState(() => load('ff_dayKey', todayKey()))
+  const [moveTasksToTomorrow, setMoveTasksToTomorrow] = useState(() => load('ff_moveTasksToTomorrow', false))
   const [focusTask, setFocusTask] = useState(() => load('ff_focusTask', null))
   const [timerSelected, setTimerSelected] = useState(() => {
     const s = load('ff_timer', null)
@@ -140,6 +139,36 @@ export default function App() {
   useEffect(() => save('ff_feedbackOn', feedbackOn), [feedbackOn])
   useEffect(() => save('ff_focusTask', focusTask), [focusTask])
   useEffect(() => save('ff_setupComplete', setupComplete), [setupComplete])
+  useEffect(() => save('ff_dayKey', dayKey), [dayKey])
+  useEffect(() => save('ff_moveTasksToTomorrow', moveTasksToTomorrow), [moveTasksToTomorrow])
+  useEffect(() => {
+    const currentDay = todayKey()
+    const savedDay = load('ff_dayKey', currentDay)
+    const shouldCarry = load('ff_moveTasksToTomorrow', false)
+    if (savedDay === currentDay) return
+    if (shouldCarry) {
+      setTasks(prev => prev.map(t => ({ ...t, done: false })))
+      setTinyDone(false)
+      setHabits(prev => prev.map(h => ({ ...h, todayStatus: null, skipMsg: null })))
+      setMoveTasksToTomorrow(false)
+      setRestarted(false)
+      setRestartOpen(false)
+    } else {
+      clearInterval(timerRef.current)
+      setTasks(defaultTasks)
+      setMainGoal(DEFAULT_GOAL)
+      setTinyText(DEFAULT_TINY)
+      setTinyDone(false)
+      setFocusTask(null)
+      setSetupComplete(false)
+      setSetupOpen(true)
+      setRestarted(false)
+      setRestartOpen(false)
+      setTimerSelected(DURATIONS.find(d => d.label === '25 min')); setTimerEndAt(null); setTimerLeft(null)
+      setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerPartial(false)
+    }
+    setDayKey(currentDay)
+  }, [])
   useEffect(() => {
     save('ff_timer', {
       selectedLabel: timerSelected.label,
@@ -180,28 +209,30 @@ export default function App() {
     setTasks(prev => prev.map(t => ({ ...t, done: false })))
     setTinyDone(false)
     setHabits(prev => prev.map(h => ({ ...h, todayStatus: null, skipMsg: null })))
+    setMoveTasksToTomorrow(false)
+    setDayKey(todayKey())
     setRestarted(false)
     setRestartOpen(false)
   }
 
   function resetAllData() {
     if (!window.confirm('Reset all data? This cannot be undone.')) return
-    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask','ff_setupComplete'].forEach(k => localStorage.removeItem(k))
+    ;['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask','ff_setupComplete','ff_dayKey','ff_moveTasksToTomorrow'].forEach(k => localStorage.removeItem(k))
     setPoints(0); setTasks(defaultTasks); setTinyDone(false)
     setMainGoal(DEFAULT_GOAL); setTinyText(DEFAULT_TINY)
     setHabits([]); setRewards(DEFAULT_REWARDS); setGoals([])
     setRestartOpen(false); setRestarted(false); setFocusTask(null)
     setSetupComplete(false); setSetupOpen(false); setTab('today')
+    setDayKey(todayKey()); setMoveTasksToTomorrow(false)
     clearInterval(timerRef.current)
     setTimerSelected(DURATIONS.find(d => d.label === '25 min')); setTimerEndAt(null); setTimerLeft(null)
     setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerPartial(false)
   }
 
-  function pickRestartOption(opt) {
-    setTinyText(opt.tiny); setTinyDone(false)
-    if (opt.id === 'tomorrow') setTasks(prev => prev.map(t => ({ ...t, done: false })))
-    setRestartOpen(false); setRestarted(true)
-    if (opt.id === 'focus10') setTimeout(() => setTab('focus'), 300)
+  function moveTasksForward() {
+    setMoveTasksToTomorrow(true)
+    setRestartOpen(false)
+    setRestarted(true)
   }
 
   function toggleTask(id) {
@@ -244,6 +275,7 @@ export default function App() {
     clearInterval(timerRef.current)
     setTimerSelected(DURATIONS.find(d => d.label === '25 min')); setTimerEndAt(null); setTimerLeft(null)
     setTimerRunning(false); setTimerCompleted(false); setTimerClaimed(false); setTimerPartial(false)
+    setMoveTasksToTomorrow(false)
     setTab('today')
   }
   function buildFocusPlan(taskTexts, mainText, tinyTaskText) {
@@ -310,7 +342,7 @@ export default function App() {
   const nextBestTask  = tasks.find(t => !t.done) || null
 
   function exportData() {
-    const keys = ['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask','ff_setupComplete']
+    const keys = ['ff_points','ff_tasks','ff_tinyDone','ff_mainGoal','ff_tinyText','ff_habits','ff_rewards','ff_goals','ff_timer','ff_feedbackOn','ff_focusTask','ff_setupComplete','ff_dayKey','ff_moveTasksToTomorrow']
     const data = {}
     keys.forEach(k => { try { const v = localStorage.getItem(k); if (v !== null) data[k] = JSON.parse(v) } catch {} })
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -384,7 +416,7 @@ export default function App() {
             <div style={{ background: 'rgba(255,255,255,0.035)', border: `1px solid ${C.border}`, borderRadius: 22, padding: '16px', boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label tone="orange">⚡ Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
               {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Tiny Win logged</div> : <div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.35 }}>{tinyText}</div>}
-              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '10 min')} style={{ ...GhostBtn, width: 'auto', minWidth: 168, marginTop: 12, padding: '11px 14px', borderRadius: 999 }}>Start 10-Min Tiny Focus</button>}
+              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '10 min')} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 16px', minHeight: 46, marginTop: 12, minWidth: 188, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>Start 10-Min Tiny Focus</button>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '10px 0 2px' }}>
@@ -430,9 +462,9 @@ export default function App() {
               </div>
             </div>
 
-            {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 750, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>Your Tiny Start has been updated. Keep going.</div></div>}
+            {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 750, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>{moveTasksToTomorrow ? 'Tasks will carry into tomorrow.' : 'Your day controls are updated.'}</div></div>}
 
-            {restartOpen ? <RestartPanel onPick={pickRestartOption} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '18px 20px', borderRadius: 26, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', background: 'rgba(255,255,255,0.035)', boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}><span style={{ display: 'flex', alignItems: 'center', gap: 16 }}><span style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 27 }}>↻</span><span><span style={{ display: 'block', color: C.textPri, fontSize: 18, fontWeight: 850 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 14, marginTop: 3, fontWeight: 500 }}>Clear the slate. Reset your focus.</span></span></span><span style={{ color: C.textMut, fontSize: 28 }}>›</span></button>}
+            {restartOpen ? <RestartPanel onStartNewDay={startNewDay} onRebuildToday={rebuildToday} onMoveTasks={moveTasksForward} onCancel={() => setRestartOpen(false)} /> : <button onClick={() => { setRestartOpen(true); setRestarted(false) }} style={{ ...GhostBtn, padding: '18px 20px', borderRadius: 26, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', background: 'rgba(255,255,255,0.035)', boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}><span style={{ display: 'flex', alignItems: 'center', gap: 16 }}><span style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 27 }}>↻</span><span><span style={{ display: 'block', color: C.textPri, fontSize: 18, fontWeight: 850 }}>Restart My Day</span><span style={{ display: 'block', color: C.textMut, fontSize: 14, marginTop: 3, fontWeight: 500 }}>Reset today's focus without losing rewards or habits.</span></span></span><span style={{ color: C.textMut, fontSize: 28 }}>›</span></button>}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ color: C.textMut, fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.1, paddingLeft: 2 }}>Explore More</div>
@@ -453,8 +485,6 @@ export default function App() {
                   </div>
                   <div style={{ color: C.textPri, fontSize: 30, fontWeight: 800 }}>{points}</div>
                 </div>
-                <button onClick={startNewDay} style={{ ...GhostBtn, padding: '13px' }}>Start New Day</button>
-                <button onClick={rebuildToday} style={{ ...GhostBtn, padding: '13px' }}>Rebuild Today</button>
                 <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Settings</div>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -508,10 +538,15 @@ export default function App() {
   )
 }
 
-function RestartPanel({ onPick, onCancel }) {
+function RestartPanel({ onStartNewDay, onRebuildToday, onMoveTasks, onCancel }) {
+  const actions = [
+    { label: 'Start New Day', tip: 'Clear done states and keep this task list.', onClick: onStartNewDay },
+    { label: 'Rebuild Today', tip: 'Create a fresh task list in setup.', onClick: onRebuildToday },
+    { label: 'Move Tasks to Tomorrow', tip: 'Carry this task list forward once.', onClick: onMoveTasks },
+  ]
   return <div style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
-    <div style={{ padding: '16px 18px 12px', borderBottom: `1px solid ${C.border}` }}><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>How do you want to restart?</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>Pick what feels right right now.</div></div>
-    {RESTART_OPTIONS.map((opt, i) => <button key={opt.id} onClick={() => onPick(opt)} style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: i < RESTART_OPTIONS.length - 1 ? `1px solid ${C.border}` : 'none', padding: '14px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}><span style={{ fontSize: 18, width: 38, height: 38, borderRadius: 12, background: C.cardAlt, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{opt.emoji}</span><span style={{ fontSize: 14, fontWeight: 600, color: C.textPri }}>{opt.label}</span></button>)}
+    <div style={{ padding: '16px 18px 12px', borderBottom: `1px solid ${C.border}` }}><div style={{ fontWeight: 800, fontSize: 16, color: C.textPri }}>Restart My Day</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 4 }}>Reset today's focus without losing rewards or habits.</div></div>
+    {actions.map((action, i) => <button key={action.label} onClick={action.onClick} style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: i < actions.length - 1 ? `1px solid ${C.border}` : 'none', padding: '14px 18px', cursor: 'pointer', textAlign: 'left' }}><span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: C.textPri }}>{action.label}</span><span style={{ display: 'block', fontSize: 12, color: C.textSec, marginTop: 3 }}>{action.tip}</span></button>)}
     <div style={{ padding: '10px 18px', borderTop: `1px solid ${C.border}` }}><button onClick={onCancel} style={{ width: '100%', background: 'transparent', border: 'none', color: C.textMut, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '6px' }}>Cancel</button></div>
   </div>
 }
