@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { C, DURATIONS } from '../constants.js'
-import { Card, Label, PrimaryBtn, GhostBtn } from './ui.jsx'
+import { C } from '../constants/colors.js'
+import { DURATIONS } from '../constants/durations.js'
+import { Card, Label, PrimaryBtn, GhostBtn } from './Card.jsx'
 
 export function FocusTimer({ selected, setSelected, timeLeft, running, completed, claimed, partial, feedbackOn, setFeedbackOn, onStart, onPause, onResume, onReset, onClaim, onEndEarly, focusTask, onClearFocusTask, onRestartDay }) {
   const [stuckOpen, setStuckOpen] = useState(false)

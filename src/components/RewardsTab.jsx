@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { C } from '../constants.js'
-import { Card, Label, Empty, PrimaryBtn, GhostBtn } from '../components/ui.jsx'
+import { C } from '../constants/colors.js'
+import { Card, Label, Empty, PrimaryBtn, GhostBtn } from './Card.jsx'
 
 export function RewardsTab({ points, rewards, setRewards, onClaim }) {
   const [flash, setFlash] = useState(null)

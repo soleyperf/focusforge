@@ -1,4 +1,4 @@
-﻿export function load(key, fallback) {
+export function load(key, fallback) {
   try {
     const v = localStorage.getItem(key)
     return v !== null ? JSON.parse(v) : fallback

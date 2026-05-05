@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { C, hasCustomTasks } from '../constants.js'
-import { Label, PrimaryBtn, GhostBtn } from './ui.jsx'
+import { C } from '../constants/colors.js'
+import { hasCustomTasks } from '../constants/defaults.js'
+import { Label, PrimaryBtn, GhostBtn } from './Card.jsx'
 
 export function SetupScreen({ tasks, goals, onBuild }) {
   const initialTexts = Array.isArray(tasks) && hasCustomTasks(tasks) ? tasks.map(t => t.text || '').slice(0, 5) : ['', '', '']

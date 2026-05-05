@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { C } from '../constants.js'
-import { Label, PrimaryBtn, GhostBtn } from '../components/ui.jsx'
+import { C } from '../constants/colors.js'
+import { Label, PrimaryBtn, GhostBtn } from './Card.jsx'
 
 export function GoalsTab({ goals, setGoals, tasks }) {
   const [adding, setAdding] = useState(false)

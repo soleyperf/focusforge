@@ -1,4 +1,4 @@
-﻿export function playCompletionSound() {
+export function playCompletionSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)()
     const notes = [523.25, 659.25, 783.99, 1046.5]
