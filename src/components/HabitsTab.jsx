@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { C, SKIP_MESSAGES } from '../constants.js'
-import { Card, Label, PrimaryBtn, GhostBtn } from '../components/ui.jsx'
+import { C } from '../constants/colors.js'
+import { SKIP_MESSAGES } from '../constants/defaults.js'
+import { Card, Label, PrimaryBtn, GhostBtn } from './Card.jsx'
 
 export function HabitsTab({ habits, setHabits, onPoints }) {
   const [newName, setNewName] = useState('')

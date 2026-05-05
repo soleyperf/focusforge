@@ -1,4 +1,4 @@
-import { C } from '../constants.js'
+import { C } from '../constants/colors.js'
 
 export function RestartPanel({ onStartNewDay, onRebuildToday, onMoveTasks, onCancel }) {
   const actions = [
