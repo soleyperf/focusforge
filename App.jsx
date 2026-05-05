@@ -5,6 +5,7 @@ import { playCompletionSound, vibrateCompletion } from './utils/timerFeedback.js
 import { EditableText } from './components/EditableText.jsx'
 import { Card, Label, Badge, Empty, PrimaryBtn, GhostBtn } from './components/ui.jsx'
 import { Header } from './components/Header.jsx'
+import { BottomNav } from './components/BottomNav.jsx'
 
 function todayKey() {
   const d = new Date()
@@ -454,15 +455,7 @@ export default function App() {
       <div style={{ padding: '22px 16px 118px', textAlign: 'center', borderTop: `1px solid ${C.border}`, marginTop: 10 }}>
         <p style={{ fontSize: 11, color: C.textMut, margin: 0, lineHeight: 1.6 }}>FocusForge is a productivity support tool, not medical treatment or clinical advice.</p>
       </div>
-      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'linear-gradient(180deg, rgba(22,27,38,0.96), rgba(13,15,20,0.99))', borderTop: `1px solid ${C.border}`, boxShadow: '0 -18px 44px rgba(0,0,0,0.54)', padding: '10px 12px calc(10px + env(safe-area-inset-bottom))' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr 74px 1fr 1fr', alignItems: 'end', gap: 4 }}>
-          <button onClick={() => setTab('today')} style={{ background: tab === 'today' ? C.orangeLight : 'transparent', color: tab === 'today' ? '#fbbf24' : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'today' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>☀️</span><span>Today</span></button>
-          <button onClick={() => setTab('goals')} style={{ background: tab === 'goals' ? C.blueLight : 'transparent', color: tab === 'goals' ? C.blue : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'goals' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>🎯</span><span>Goals</span></button>
-          <button onClick={() => setTab('focus')} aria-label="Focus" style={{ width: 62, height: 62, justifySelf: 'center', marginTop: -24, borderRadius: '50%', background: `linear-gradient(135deg, ${C.orange} 0%, #ef6b4a 100%)`, color: '#fff', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 12px 28px rgba(249,115,22,0.34)', fontSize: 20, lineHeight: 1, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, fontWeight: 850 }}><span>▶</span><span style={{ fontSize: 10 }}>Focus</span></button>
-          <button onClick={() => setTab('habits')} style={{ background: tab === 'habits' ? C.greenLight : 'transparent', color: tab === 'habits' ? C.green : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'habits' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>🌿</span><span>Habits</span></button>
-          <button onClick={() => setTab('rewards')} style={{ background: tab === 'rewards' ? C.orangeLight : 'transparent', color: tab === 'rewards' ? C.orange : C.textSec, border: '1px solid transparent', borderRadius: 18, padding: '8px 4px', minHeight: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, fontWeight: tab === 'rewards' ? 850 : 650, fontSize: 11, cursor: 'pointer' }}><span style={{ fontSize: 22, lineHeight: 1 }}>🎁</span><span>Rewards</span></button>
-        </div>
-      </nav>
+      <BottomNav tab={tab} onNavigate={setTab} />
     </div>
   )
 }
