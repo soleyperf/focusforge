@@ -37,6 +37,7 @@ export default function App() {
   const [restarted, setRestarted] = useState(false)
   const [setupComplete, setSetupComplete] = useState(initialSetupComplete)
   const [setupOpen, setSetupOpen] = useState(false)
+  const [setupBuiltNotice, setSetupBuiltNotice] = useState(false)
   const [dayKey, setDayKey] = useState(() => load('ff_dayKey', todayKey()))
   const [moveTasksToTomorrow, setMoveTasksToTomorrow] = useState(() => load('ff_moveTasksToTomorrow', false))
   const [focusTask, setFocusTask] = useState(() => load('ff_focusTask', null))
@@ -140,6 +141,11 @@ export default function App() {
     }
   }, [timerCompleted])
   useEffect(() => {
+    if (!setupBuiltNotice) return
+    const timeout = setTimeout(() => setSetupBuiltNotice(false), 6000)
+    return () => clearTimeout(timeout)
+  }, [setupBuiltNotice])
+  useEffect(() => {
     if (timerRunning && timerEndAt) {
       timerRef.current = setInterval(() => {
         const left = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000))
@@ -219,6 +225,7 @@ export default function App() {
     setFocusTask(null)
     setSetupComplete(false)
     setSetupOpen(true)
+    setSetupBuiltNotice(false)
     setRestartOpen(false)
     setRestarted(false)
     clearInterval(timerRef.current)
@@ -247,6 +254,7 @@ export default function App() {
     setRestartOpen(false)
     setRestarted(false)
     setTab('today')
+    setSetupBuiltNotice(true)
   }
   const timerStart = () => {
     const endAt = Date.now() + timerSelected.seconds * 1000
@@ -335,6 +343,12 @@ export default function App() {
 
         {tab === 'today' && !showSetup && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {setupBuiltNotice && (
+              <div style={{ background: 'rgba(255,255,255,0.035)', border: `1px solid ${C.border}`, borderRadius: 18, padding: '12px 14px', color: C.textSec }}>
+                <div style={{ fontSize: 13, fontWeight: 850, color: C.textPri }}>Today is built.</div>
+                <div style={{ fontSize: 12, marginTop: 3 }}>Start your Main Quest.</div>
+              </div>
+            )}
             {nextBestTask && (
               <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.16) 0%, rgba(251,191,36,0.07) 48%, rgba(34,197,94,0.10) 100%)', border: `1px solid rgba(249,115,22,0.30)`, borderRadius: 28, padding: '22px', display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 20px 44px rgba(249,115,22,0.18)' }}>
                 <div>
