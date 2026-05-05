@@ -364,11 +364,6 @@ export default function App() {
   }
 
   const doneTasks = tasks.filter(t => t.done).length
-  const nextReward = rewards.length > 0
-    ? (rewards.filter(r => r.cost > points).sort((a, b) => a.cost - b.cost)[0] || rewards.slice().sort((a, b) => a.cost - b.cost)[0])
-    : null
-  const pctToReward = nextReward ? Math.min(100, (points / nextReward.cost) * 100) : 0
-  const canClaim = nextReward ? points >= nextReward.cost : false
   const showSetup = tab === 'today' && (!setupComplete || setupOpen)
 
   return (
@@ -405,7 +400,7 @@ export default function App() {
             {!nextBestTask && (
               <div style={{ background: 'linear-gradient(135deg,#1a2030 0%,#0f1520 100%)', border: `1px solid rgba(249,115,22,0.25)`, borderRadius: 28, padding: '20px', boxShadow: '0 18px 40px rgba(0,0,0,0.20)' }}>
                 <div style={{ fontSize: 12, fontWeight: 850, color: C.orange, textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 8 }}>All tasks done</div>
-                <div style={{ fontSize: 15, color: C.textSec, marginBottom: 14, lineHeight: 1.5 }}>Great work. Start a focus session or set a new tiny start.</div>
+                <div style={{ fontSize: 15, color: C.textSec, marginBottom: 14, lineHeight: 1.5 }}>Great work. Start a focus session or set a new side quest.</div>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button onClick={() => setTab('focus')} style={{ ...PrimaryBtn, flex: 1, padding: '12px' }}>Focus</button>
                   <button onClick={() => setTinyDone(false)} style={{ ...GhostBtn, flex: 1, padding: '12px' }}>New Start</button>
@@ -414,9 +409,9 @@ export default function App() {
             )}
 
             <div style={{ background: 'rgba(255,255,255,0.035)', border: `1px solid ${C.border}`, borderRadius: 22, padding: '16px', boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><Label tone="orange">⚡ Tiny Start</Label>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
-              {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Tiny Win logged</div> : <div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.35 }}>{tinyText}</div>}
-              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '10 min')} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 16px', minHeight: 46, marginTop: 12, minWidth: 188, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>Start 10-Min Tiny Focus</button>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}><div><Label tone="orange">Side Quest</Label><div style={{ color: C.textMut, fontSize: 12, fontWeight: 800, marginTop: -8 }}>Easy Win</div></div>{tinyDone && <Badge color={C.green}>+2 pts</Badge>}</div>
+              {tinyDone ? <div style={{ color: C.textPri, fontSize: 17, fontWeight: 800 }}>Side Quest logged</div> : <div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.35 }}>{tinyText}</div>}
+              {!tinyDone && <button onClick={() => startFocus({ text: tinyText }, '10 min')} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 16px', minHeight: 46, marginTop: 12, minWidth: 188, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>Start Side Quest (10 min)</button>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '10px 0 2px' }}>
@@ -444,23 +439,6 @@ export default function App() {
               <Label tone="green">Main Goal</Label>
               <EditableText value={mainGoal} onChange={setMainGoal} placeholder="What's the one thing that matters today?" multiline size="large" />
             </Card>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(156px, 1fr))', gap: 12 }}>
-              <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.10), rgba(22,27,38,0.96))', border: `1px solid rgba(34,197,94,0.20)`, borderRadius: 24, padding: '18px', minHeight: 132, boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}>
-                <Label tone="green">Habit Status</Label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 58, height: 58, borderRadius: '50%', border: `7px solid ${C.orange}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.textPri, fontWeight: 850, fontSize: 17 }}>{habits.filter(h => h.todayStatus === 'full' || h.todayStatus === 'partial').length}/{Math.max(habits.length, 1)}</div>
-                  <div><div style={{ color: C.textPri, fontSize: 17, fontWeight: 800, lineHeight: 1.25 }}>habits done today</div><div style={{ color: C.textSec, fontSize: 13, marginTop: 6 }}>Keep it going. 🌿</div></div>
-                </div>
-              </div>
-              <div style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.11), rgba(22,27,38,0.96))', border: `1px solid rgba(249,115,22,0.20)`, borderRadius: 24, padding: '18px', minHeight: 132, boxShadow: '0 16px 34px rgba(0,0,0,0.16)' }}>
-                <Label tone="orange">Reward Waiting</Label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 52, height: 52, borderRadius: 16, background: C.orangeLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>{nextReward?.emoji || '🎁'}</div>
-                  <div style={{ minWidth: 0 }}><div style={{ color: C.textSec, fontSize: 13 }}>{canClaim ? "You've earned" : nextReward ? `${Math.max(0, nextReward.cost - points)} pts to go` : 'Add a reward'}</div><div style={{ color: C.textPri, fontSize: 18, fontWeight: 800, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nextReward?.name || 'Reward Bank'}</div><button onClick={() => setTab('rewards')} style={{ marginTop: 10, background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '9px 13px', fontWeight: 850, fontSize: 12, cursor: 'pointer' }}>{canClaim ? 'Claim Reward' : 'View Rewards'}</button></div>
-                </div>
-              </div>
-            </div>
 
             {restarted && !restartOpen && <div style={{ background: C.greenLight, border: `1px solid rgba(34,197,94,0.25)`, borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}><div style={{ fontWeight: 750, fontSize: 14, color: C.green }}>Today is still usable.</div><div style={{ fontSize: 12, color: C.textSec }}>{moveTasksToTomorrow ? 'Tasks will carry into tomorrow.' : 'Your day controls are updated.'}</div></div>}
 
@@ -931,7 +909,7 @@ function SetupScreen({ tasks, onBuild }) {
           {validTasks.map(task => choiceButton(task, selectedMain === task, () => setMainTask(task)))}
         </div>
         <div style={{ height: 14 }} />
-        <Label tone="orange">Pick your Tiny Start</Label>
+        <Label tone="orange">Pick a Side Quest</Label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
           {tinyOptions.map(task => choiceButton(task, selectedTiny === task, () => setTinyTask(task)))}
         </div>
