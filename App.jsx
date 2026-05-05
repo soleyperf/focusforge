@@ -278,13 +278,16 @@ export default function App() {
     setMoveTasksToTomorrow(false)
     setTab('today')
   }
-  function buildFocusPlan(taskTexts, mainText, tinyTaskText) {
+  function buildFocusPlan(taskTexts, mainText, tinyTaskText, goalLink = {}) {
     const clean = taskTexts.map(t => t.trim()).filter(Boolean)
     if (clean.length < 3) return
     const priority = mainText || clean[0]
     const tinyTask = tinyTaskText && tinyTaskText !== priority ? tinyTaskText : (clean.find(t => t !== priority) || clean[1] || priority)
     const ordered = [priority, tinyTask, ...clean.filter((text, i) => i !== clean.indexOf(priority) && i !== clean.indexOf(tinyTask))]
-    const nextTasks = ordered.map((text, i) => ({ id: Date.now() + i, text, done: false }))
+    const linkedGoal = goalLink.quickGoal || null
+    const goalId = linkedGoal?.id || goalLink.goalId || null
+    const nextTasks = ordered.map((text, i) => ({ id: Date.now() + i, text, done: false, ...(i === 0 && goalId ? { goalId } : {}) }))
+    if (linkedGoal) setGoals(prev => [...prev, linkedGoal])
     setTasks(nextTasks)
     setMainGoal(priority)
     setTinyText(tinyTask)
@@ -381,7 +384,7 @@ export default function App() {
       </div>
 
       <div style={{ padding: '20px 16px 112px' }}>
-        {showSetup && <SetupScreen tasks={tasks} onBuild={buildFocusPlan} />}
+        {showSetup && <SetupScreen tasks={tasks} goals={goals} onBuild={buildFocusPlan} />}
 
         {tab === 'today' && !showSetup && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -390,6 +393,7 @@ export default function App() {
                 <div>
                   <Label tone="orange">Start Here</Label>
                   <div style={{ fontSize: 22, fontWeight: 850, color: C.textPri, lineHeight: 1.28, letterSpacing: -0.2 }}>{nextBestTask.text}</div>
+                  {nextBestTask.goalId && <div style={{ fontSize: 12, color: C.textMut, marginTop: 8, fontWeight: 700 }}>Supports: {goals.find(g => g.id === nextBestTask.goalId)?.name || 'Goal'}</div>}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                   {['10 min','15 min','20 min','25 min'].map(label => <button key={label} onClick={() => startFocus(nextBestTask, label)} style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f97316 100%)', color: '#1a1208', border: 'none', borderRadius: 999, padding: '12px 6px', minHeight: 46, fontWeight: 850, fontSize: 13, cursor: 'pointer', boxShadow: '0 12px 24px rgba(249,115,22,0.18)' }}>{label}</button>)}
@@ -489,7 +493,7 @@ export default function App() {
           focusTask={focusTask} onClearFocusTask={() => setFocusTask(null)}
           onRestartDay={() => { setTab('today'); setRestartOpen(true) }}
         />}
-        {tab === 'goals' && <GoalsTab goals={goals} setGoals={setGoals} />}
+        {tab === 'goals' && <GoalsTab goals={goals} setGoals={setGoals} tasks={tasks} />}
         {tab === 'habits' && <HabitsTab habits={habits} setHabits={setHabits} onPoints={p => setPoints(prev => Math.max(0, prev + p))} />}
         {tab === 'rewards' && (
           <RewardsTab
@@ -704,31 +708,22 @@ function RewardsTab({ points, rewards, setRewards, onClaim }) {
   )
 }
 
-const BREAKDOWN_STEPS = [
-  'Write down exactly what done looks like.',
-  'Identify the very first physical action.',
-  'Remove one obstacle before you start.',
-  'Set a timer for 10 minutes and just begin.',
-  'After 10 minutes, decide whether to keep going.',
-]
-
-function GoalsTab({ goals, setGoals }) {
+function GoalsTab({ goals, setGoals, tasks }) {
   const [adding, setAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [expandedId, setExpandedId] = useState(null)
-  const [form, setForm] = useState({ name: '', why: '', tinyStep: '', minWin: '', backup: '' })
+  const [form, setForm] = useState({ name: '', why: '', timeframe: '' })
   const [nameError, setNameError] = useState(false)
   const nameRef = useRef()
   useEffect(() => { if ((adding || editingId) && nameRef.current) nameRef.current.focus() }, [adding, editingId])
 
-  function blankForm() { return { name: '', why: '', tinyStep: '', minWin: '', backup: '' } }
+  function blankForm() { return { name: '', why: '', timeframe: '' } }
 
   function startAdd() { setEditingId(null); setForm(blankForm()); setAdding(true) }
 
   function startEdit(goal) {
     setAdding(false)
     setEditingId(goal.id)
-    setForm({ name: goal.name, why: goal.why || '', tinyStep: goal.tinyStep || '', minWin: goal.minWin || '', backup: goal.backup || '' })
+    setForm({ name: goal.name || goal.title || '', why: goal.why || '', timeframe: goal.timeframe || '' })
   }
 
   function cancelForm() { setAdding(false); setEditingId(null); setNameError(false) }
@@ -737,7 +732,7 @@ function GoalsTab({ goals, setGoals }) {
     const name = form.name.trim()
     if (!name) { setNameError(true); return }
     setNameError(false)
-    setGoals(prev => [...prev, { id: Date.now(), name, why: form.why, tinyStep: form.tinyStep, minWin: form.minWin, backup: form.backup, breakdown: false }])
+    setGoals(prev => [...prev, { id: Date.now(), name, why: form.why, timeframe: form.timeframe }])
     setAdding(false)
   }
 
@@ -745,13 +740,11 @@ function GoalsTab({ goals, setGoals }) {
     const name = form.name.trim()
     if (!name) { setNameError(true); return }
     setNameError(false)
-    setGoals(prev => prev.map(g => g.id === editingId ? { ...g, name, why: form.why, tinyStep: form.tinyStep, minWin: form.minWin, backup: form.backup } : g))
+    setGoals(prev => prev.map(g => g.id === editingId ? { ...g, name, why: form.why, timeframe: form.timeframe } : g))
     setEditingId(null)
   }
 
-  function deleteGoal(id) { setGoals(prev => prev.filter(g => g.id !== id)); if (expandedId === id) setExpandedId(null) }
-
-  function toggleBreakdown(id) { setExpandedId(v => v === id ? null : id) }
+  function deleteGoal(id) { setGoals(prev => prev.filter(g => g.id !== id)) }
 
   const Field = ({ label, value, field, placeholder, multiline }) => (
     <div style={{ marginBottom: 10 }}>
@@ -772,9 +765,7 @@ function GoalsTab({ goals, setGoals }) {
         {nameError && <div style={{ fontSize: 12, color: C.red, marginTop: 5 }}>Goal name is required.</div>}
       </div>
       <Field label="Why it matters" field="why" value={form.why} placeholder="What changes if you achieve this?" multiline />
-      <Field label="Tiny next step" field="tinyStep" value={form.tinyStep} placeholder="The smallest possible action right now" />
-      <Field label="Minimum win" field="minWin" value={form.minWin} placeholder="What counts as good enough today?" />
-      <Field label="Backup plan" field="backup" value={form.backup} placeholder="If things go wrong, I will..." />
+      <Field label="Timeframe" field="timeframe" value={form.timeframe} placeholder="e.g. this month, 12 weeks, by summer" />
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button onClick={onSave} style={{ ...PrimaryBtn, flex: 1 }}>Save goal</button>
         <button onClick={cancelForm} style={{ ...GhostBtn, flex: 1 }}>Cancel</button>
@@ -801,36 +792,21 @@ function GoalsTab({ goals, setGoals }) {
 
       {goals.map(goal => {
         if (editingId === goal.id) return <div key={goal.id}><GoalForm onSave={saveEdit} /></div>
-        const isExpanded = expandedId === goal.id
+        const linkedTasks = tasks.filter(task => task.goalId === goal.id)
         return (
           <div key={goal.id} style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
             <div style={{ padding: '16px 18px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: goal.why || goal.tinyStep || goal.minWin || goal.backup ? 10 : 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 16, color: C.textPri, flex: 1, paddingRight: 10 }}>{goal.name}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: goal.why || goal.timeframe || linkedTasks.length ? 10 : 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 16, color: C.textPri, flex: 1, paddingRight: 10 }}>{goal.name || goal.title}</div>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                   <button onClick={() => startEdit(goal)} style={{ background: C.cardAlt, color: C.textSec, border: `1px solid ${C.border}`, borderRadius: 9, padding: '5px 10px', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>Edit</button>
                   <button onClick={() => deleteGoal(goal.id)} style={{ background: 'rgba(239,68,68,0.1)', color: C.red, border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 9, padding: '5px 10px', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>Delete</button>
                 </div>
               </div>
               {goal.why && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Why: </span>{goal.why}</div>}
-              {goal.tinyStep && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Next step: </span>{goal.tinyStep}</div>}
-              {goal.minWin && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Min win: </span>{goal.minWin}</div>}
-              {goal.backup && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Backup: </span>{goal.backup}</div>}
-              <button onClick={() => toggleBreakdown(goal.id)} style={{ marginTop: 8, background: isExpanded ? C.blueLight : C.cardAlt, color: isExpanded ? C.blue : C.textSec, border: `1px solid ${isExpanded ? C.blue : C.border}`, borderRadius: 10, padding: '7px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
-                {isExpanded ? '▲ Hide breakdown' : '🧩 Break It Down'}
-              </button>
+              {goal.timeframe && <div style={{ fontSize: 13, color: C.textSec, marginBottom: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Timeframe: </span>{goal.timeframe}</div>}
+              {linkedTasks.map(task => <div key={task.id} style={{ fontSize: 13, color: C.textSec, marginTop: 6 }}><span style={{ color: C.textMut, fontWeight: 600 }}>Today: </span>{task.text}</div>)}
             </div>
-            {isExpanded && (
-              <div style={{ borderTop: `1px solid ${C.border}`, padding: '14px 18px', background: C.cardAlt }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: C.textMut, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Action steps</div>
-                {BREAKDOWN_STEPS.map((step, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
-                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: C.blueLight, color: C.blue, fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
-                    <div style={{ fontSize: 13, color: C.textSec, lineHeight: 1.5 }}>{step}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )
       })}
@@ -875,11 +851,15 @@ function playCompletionSound() {
   } catch {}
 }
 
-function SetupScreen({ tasks, onBuild }) {
+function SetupScreen({ tasks, goals, onBuild }) {
   const initialTexts = Array.isArray(tasks) && hasCustomTasks(tasks) ? tasks.map(t => t.text || '').slice(0, 5) : ['', '', '']
   const [inputs, setInputs] = useState(() => initialTexts.length >= 3 ? initialTexts : ['', '', ''])
   const [mainTask, setMainTask] = useState('')
   const [tinyTask, setTinyTask] = useState('')
+  const [goalMode, setGoalMode] = useState('skip')
+  const [selectedGoalId, setSelectedGoalId] = useState(null)
+  const [quickGoalName, setQuickGoalName] = useState('')
+  const [quickGoalWhy, setQuickGoalWhy] = useState('')
   const validTasks = inputs.map(t => t.trim()).filter(Boolean)
   const canBuild = validTasks.length >= 3
   const selectedMain = mainTask && validTasks.includes(mainTask) ? mainTask : validTasks[0] || ''
@@ -890,8 +870,17 @@ function SetupScreen({ tasks, onBuild }) {
     if (canBuild && !tinyOptions.includes(tinyTask)) setTinyTask(tinyOptions[0] || '')
   }, [canBuild, mainTask, tinyTask, validTasks.join('|')])
   const updateInput = (index, value) => setInputs(prev => prev.map((item, i) => i === index ? value : item))
-  const submit = () => { if (canBuild) onBuild(inputs, selectedMain, selectedTiny) }
+  const submit = () => {
+    if (!canBuild) return
+    if (goalMode === 'add' && quickGoalName.trim()) {
+      const quickGoal = { id: Date.now(), name: quickGoalName.trim(), why: quickGoalWhy.trim(), timeframe: '' }
+      onBuild(inputs, selectedMain, selectedTiny, { quickGoal })
+      return
+    }
+    onBuild(inputs, selectedMain, selectedTiny, { goalId: goalMode === 'choose' ? selectedGoalId : null })
+  }
   const choiceButton = (task, active, onClick) => <button key={task} onClick={onClick} style={{ background: active ? C.orangeLight : 'rgba(255,255,255,0.025)', border: `1.5px solid ${active ? C.orange : C.border}`, borderRadius: 16, padding: '13px 14px', color: active ? C.textPri : C.textSec, fontWeight: active ? 850 : 650, fontSize: 14, textAlign: 'left', cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}><span style={{ width: 22, height: 22, borderRadius: '50%', border: `1.5px solid ${active ? C.orange : C.border}`, background: active ? C.orange : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1208', fontSize: 12, fontWeight: 900 }}>{active ? '✓' : ''}</span><span>{task}</span></button>
+  const goalOption = (mode, label) => <button key={mode} onClick={() => setGoalMode(mode)} style={{ background: goalMode === mode ? C.blueLight : 'rgba(255,255,255,0.025)', border: `1.5px solid ${goalMode === mode ? C.blue : C.border}`, borderRadius: 14, padding: '11px 10px', color: goalMode === mode ? C.blue : C.textSec, fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>{label}</button>
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
     <div style={{ padding: '4px 2px 0' }}>
       <div style={{ fontSize: 13, color: C.textSec, lineHeight: 1.5 }}>Get it out of your head. We'll turn it into a plan.</div>
@@ -913,6 +902,20 @@ function SetupScreen({ tasks, onBuild }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
           {tinyOptions.map(task => choiceButton(task, selectedTiny === task, () => setTinyTask(task)))}
         </div>
+        <div style={{ height: 14 }} />
+        <Label>Does your Main Quest support a bigger goal?</Label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          {goalOption('skip', 'Skip for now')}
+          {goalOption('choose', 'Choose existing goal')}
+          {goalOption('add', 'Add quick goal')}
+        </div>
+        {goalMode === 'choose' && goals.length > 0 && <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+          {goals.map(goal => <button key={goal.id} onClick={() => setSelectedGoalId(goal.id)} style={{ background: selectedGoalId === goal.id ? C.blueLight : 'rgba(255,255,255,0.025)', border: `1.5px solid ${selectedGoalId === goal.id ? C.blue : C.border}`, borderRadius: 14, padding: '11px 12px', color: selectedGoalId === goal.id ? C.textPri : C.textSec, fontWeight: 750, textAlign: 'left', cursor: 'pointer' }}>{goal.name || goal.title}</button>)}
+        </div>}
+        {goalMode === 'add' && <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 10 }}>
+          <input value={quickGoalName} onChange={e => setQuickGoalName(e.target.value)} placeholder="Goal name" style={{ width: '100%', minHeight: 48, borderRadius: 14, border: `1.5px solid ${C.border}`, background: C.cardAlt, color: C.textPri, padding: '12px 14px', fontSize: 14, outline: 'none', fontFamily: 'inherit' }} />
+          <input value={quickGoalWhy} onChange={e => setQuickGoalWhy(e.target.value)} placeholder="Why it matters (optional)" style={{ width: '100%', minHeight: 48, borderRadius: 14, border: `1.5px solid ${C.border}`, background: C.cardAlt, color: C.textPri, padding: '12px 14px', fontSize: 14, outline: 'none', fontFamily: 'inherit' }} />
+        </div>}
       </div>}
       <button onClick={submit} disabled={!canBuild} style={{ ...PrimaryBtn, marginTop: 20, background: canBuild ? `linear-gradient(135deg, ${C.orange} 0%, #ef5f46 100%)` : C.cardAlt, color: canBuild ? '#fff' : C.textMut, cursor: canBuild ? 'pointer' : 'not-allowed', boxShadow: canBuild ? '0 18px 34px rgba(249,115,22,0.24)' : 'none' }}>{canBuild ? 'Build My Focus Plan' : 'Add at least 3 tasks'}</button>
     </div>
