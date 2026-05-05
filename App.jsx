@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { C, DEFAULT_GOAL, DEFAULT_TINY, defaultTasks, DURATIONS, DEFAULT_REWARDS, SKIP_MESSAGES } from './constants/constants.js'
 import { load, save } from './utils/storage.js'
+import { playCompletionSound, vibrateCompletion } from './utils/timerFeedback.js'
 
 function todayKey() {
   const d = new Date()
@@ -128,7 +129,7 @@ export default function App() {
     if (timerSoundFired.current) {
       if (timerCompleted && feedbackOn) {
         playCompletionSound()
-        if (navigator.vibrate) navigator.vibrate([200, 80, 200, 80, 400])
+        vibrateCompletion()
       }
     } else {
       timerSoundFired.current = true
@@ -773,27 +774,6 @@ function HabitsTab({ habits, setHabits, onPoints }) {
     {habits.length === 0 && !adding && <Card><div style={{ textAlign: 'center', padding: '24px 0' }}><div style={{ fontSize: 38, marginBottom: 10 }}>Habit</div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri, marginBottom: 6 }}>No habits yet</div><div style={{ fontSize: 13, color: C.textSec }}>Add your first habit above to get started.</div></div></Card>}
     {habits.map(habit => <div key={habit.id} style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}><div style={{ padding: '14px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><div><div style={{ fontWeight: 700, fontSize: 15, color: C.textPri }}>{habit.name}</div><div style={{ fontSize: 12, color: C.textSec, marginTop: 2 }}>{habit.streak > 0 ? `${habit.streak} day streak` : 'No streak yet - start today'}</div></div><button onClick={() => setHabits(prev => prev.filter(h => h.id !== habit.id))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textMut, fontSize: 16, padding: 4 }}>x</button></div>{habit.todayStatus === 'skip' && habit.skipMsg && <div style={{ margin: '0 14px 12px', background: C.cardAlt, borderRadius: 12, padding: '10px 13px', fontSize: 13, color: C.textSec, fontStyle: 'italic' }}>{habit.skipMsg}</div>}<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: `1px solid ${C.border}` }}>{[{ status: 'full', label: 'Full win', pts: '+3', activeColor: C.green, activeBg: C.greenLight }, { status: 'partial', label: 'Partial win', pts: '+1', activeColor: C.orange, activeBg: C.orangeLight }, { status: 'skip', label: 'Skip', pts: '', activeColor: C.textSec, activeBg: C.cardAlt }].map((btn, i) => { const active = habit.todayStatus === btn.status; return <button key={btn.status} onClick={() => markHabit(habit.id, btn.status)} style={{ background: active ? btn.activeBg : 'transparent', border: 'none', borderRight: i < 2 ? `1px solid ${C.border}` : 'none', padding: '13px 4px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}><span style={{ fontSize: 12, fontWeight: 700, color: active ? btn.activeColor : C.textSec }}>{btn.label}</span>{btn.pts && <span style={{ fontSize: 11, color: active ? btn.activeColor : C.textMut, fontWeight: 600 }}>{btn.pts} pts</span>}</button> })}</div></div>)}
   </div>
-}
-
-function playCompletionSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)()
-    const notes = [523.25, 659.25, 783.99, 1046.5]
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.type = 'sine'
-      osc.frequency.value = freq
-      const t = ctx.currentTime + i * 0.18
-      gain.gain.setValueAtTime(0, t)
-      gain.gain.linearRampToValueAtTime(0.28, t + 0.04)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55)
-      osc.start(t)
-      osc.stop(t + 0.55)
-    })
-  } catch {}
 }
 
 function SetupScreen({ tasks, goals, onBuild }) {
