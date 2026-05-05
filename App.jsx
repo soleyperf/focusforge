@@ -2,6 +2,8 @@
 import { C, DEFAULT_GOAL, DEFAULT_TINY, defaultTasks, DURATIONS, DEFAULT_REWARDS, SKIP_MESSAGES } from './constants/constants.js'
 import { load, save } from './utils/storage.js'
 import { playCompletionSound, vibrateCompletion } from './utils/timerFeedback.js'
+import { EditableText } from './components/EditableText.jsx'
+import { Card, Label, Badge, Empty, PrimaryBtn, GhostBtn } from './components/ui.jsx'
 
 function todayKey() {
   const d = new Date()
@@ -479,18 +481,6 @@ function RestartPanel({ onStartNewDay, onRebuildToday, onMoveTasks, onCancel }) 
   </div>
 }
 
-function EditableText({ value, onChange, placeholder, multiline, disabled, size }) {
-  const [editing, setEditing] = useState(false)
-  const ref = useRef()
-  useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
-  const isHero = size === 'hero'
-  const isLarge = size === 'large'
-  const textStyle = { fontSize: isHero ? 28 : isLarge ? 21 : 15, fontWeight: isHero ? 850 : isLarge ? 750 : 500, lineHeight: isHero ? 1.25 : isLarge ? 1.35 : 1.6 }
-  if (!editing) return <div onClick={() => !disabled && setEditing(true)} style={{ ...textStyle, color: disabled ? C.textMut : C.textPri, cursor: disabled ? 'default' : 'text', padding: isHero ? '4px 0' : '13px 14px', borderRadius: 16, background: isHero || disabled ? 'transparent' : C.cardAlt, border: `1px solid ${isHero || disabled ? 'transparent' : C.border}`, minHeight: isHero ? 72 : 48, display: 'flex', alignItems: 'center' }}>{value || <span style={{ color: C.textMut }}>{placeholder}</span>}{!disabled && !isHero && <span style={{ marginLeft: 'auto', paddingLeft: 8, color: C.textMut, fontSize: 13 }}>Edit</span>}</div>
-  const inputStyle = { width: '100%', ...textStyle, color: C.textPri, padding: isHero ? '8px 10px' : '13px 14px', borderRadius: 16, border: `1.5px solid ${C.blue}`, background: C.cardAlt, outline: 'none', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }
-  return multiline ? <textarea ref={ref} value={value} rows={2} onChange={e => onChange(e.target.value)} onBlur={() => setEditing(false)} style={inputStyle} /> : <input ref={ref} value={value} onChange={e => onChange(e.target.value)} onBlur={() => setEditing(false)} style={inputStyle} />
-}
-
 function TaskRow({ task, index, onToggle, onTextChange, onFocus, variant }) {
   const [editing, setEditing] = useState(false)
   const ref = useRef()
@@ -889,12 +879,3 @@ function FocusTimer({ selected, setSelected, timeLeft, running, completed, claim
     </>}
   </div>
 }
-
-function Card({ children, variant }) { return <div style={{ background: variant === 'goal' ? 'linear-gradient(135deg, rgba(255,255,255,0.055), rgba(22,27,38,0.96))' : 'rgba(22,27,38,0.96)', borderRadius: 28, padding: variant === 'goal' ? '24px 22px' : '20px', border: `1px solid ${C.border}`, boxShadow: '0 18px 40px rgba(0,0,0,0.20)' }}>{children}</div> }
-function Label({ children, tone }) { return <div style={{ fontWeight: 850, fontSize: 12, color: tone === 'orange' ? C.orange : tone === 'green' ? '#9fb58d' : C.textSec, textTransform: 'uppercase', letterSpacing: 1.15, marginBottom: 12 }}>{children}</div> }
-function Badge({ children, color }) { return <div style={{ background: color + '22', color, borderRadius: 20, padding: '4px 11px', fontSize: 11, fontWeight: 800 }}>{children}</div> }
-function Empty({ children }) { return <p style={{ color: C.textMut, fontSize: 14, margin: 0 }}>{children}</p> }
-
-const PrimaryBtn = { background: C.blue, color: '#fff', border: 'none', borderRadius: 18, padding: '15px 20px', minHeight: 50, fontWeight: 800, fontSize: 15, cursor: 'pointer', width: '100%', boxShadow: '0 12px 24px rgba(59,130,246,0.18)' }
-const GhostBtn = { background: 'transparent', border: `1.5px solid ${C.border}`, borderRadius: 18, padding: '14px 20px', minHeight: 48, color: C.textSec, fontWeight: 700, fontSize: 14, cursor: 'pointer', width: '100%' }
-
