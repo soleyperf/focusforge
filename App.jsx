@@ -1,16 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { C, DEFAULT_GOAL, DEFAULT_TINY, defaultTasks, DURATIONS, DEFAULT_REWARDS, SKIP_MESSAGES } from './constants/constants.js'
-
-/* -- Persistence helpers -- */
-function load(key, fallback) {
-  try {
-    const v = localStorage.getItem(key)
-    return v !== null ? JSON.parse(v) : fallback
-  } catch { return fallback }
-}
-function save(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
-}
+import { load, save } from './utils/storage.js'
 
 function todayKey() {
   const d = new Date()
