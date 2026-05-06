@@ -255,6 +255,7 @@ export default function App() {
     setRestarted(false)
     setTab('today')
     setSetupBuiltNotice(true)
+    setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }), 0)
   }
   const timerStart = () => {
     const endAt = Date.now() + timerSelected.seconds * 1000
